@@ -1,0 +1,147 @@
+import Enrollment from "../../models/studentmanagment/Enrollment.js";
+import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
+import mongoose from "mongoose";
+
+
+
+export const createOrderController = async (req, res) => {
+  try {
+
+    const { error, value } = createOrderValidation.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: error.details.map((err) => err.message),
+      });
+    }
+
+
+    const newOrder = new Enrollment(value);
+    const savedOrder = await newOrder.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      data: savedOrder,
+    });
+  } catch (err) {
+    console.error("Order creation error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while creating order",
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+
+export const getAllOrdersController = async (req, res) => {
+  try {
+    
+    const {
+      userId,
+      status,
+      paymentStatus,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+
+    const query = {};
+    if (userId) query.userId = userId;
+    if (status) query.status = status;
+    if (paymentStatus) query["payment.status"] = paymentStatus;
+
+    
+    const skip = (Number(page) - 1) * Number(limit);
+
+    
+    const orders = await Enrollment.find(query)
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalOrders = await Enrollment.countDocuments(query);
+
+    return res.status(200).json({
+      success: true,
+      message: "Orders fetched successfully",
+      pagination: {
+        totalOrders,
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalOrders / limit),
+      },
+      data: orders,
+    });
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching orders",
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+
+
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 10 } = req.query; 
+    const pageNum = Math.max(Number(page), 1);
+    const limitNum = Math.max(Number(limit), 1);
+
+    
+    const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { orderId: id };
+
+    const order = await Enrollment.findOne(query);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found."
+      });
+    }
+
+    
+    const totalItems = order.items.length;
+    const startIndex = (pageNum - 1) * limitNum;
+    const paginatedItems = order.items.slice(startIndex, startIndex + limitNum);
+
+    const paginatedOrder = {
+      ...order.toObject(),
+      items: paginatedItems,
+    };
+
+    res.status(200).json({
+      success: true,
+      pagination: {
+        totalItems,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalItems / limitNum),
+      },
+      data: paginatedOrder
+    });
+
+  } catch (error) {
+    console.error("Error retrieving order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while retrieving order.",
+      error: error.message
+    });
+  }
+};

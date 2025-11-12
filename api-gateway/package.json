@@ -1,0 +1,39 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:gateway": "nodemon index.js",
+    "start:auth": "cd .. && cd services/user-service && npm i && nodemon index.js",
+    "start:merchant": "cd .. && cd services/merchant-service && npm i && nodemon index.js",
+    "start:student": "cd .. && cd services/student-service && npm i && nodemon index.js",
+    "start:course": "cd .. && cd services/course-service && npm i && nodemon index.js",
+    "start:payment": "cd .. && cd services/payment-service && npm i && nodemon index.js",
+    "start:other": "cd .. && cd services/other-service && npm i && nodemon index.js",
+    "start:notification": "cd .. && cd services/notification-service && npm i && nodemon index.js",
+    "start:activity": "cd .. && cd services/activelog-service && npm i && nodemon index.js",
+    "start:content": "cd .. && cd services/content-service && npm i && nodemon index.js",
+    "start:reviews": "cd .. && cd services/reviews-service && npm i && nodemon index.js",
+    "start:reports": "cd .. && cd services/reports-service && npm i && nodemon index.js",
+    "start:all": "concurrently -n GATEWAY,AUTH,MERCHANT,STUDENT,ACTIVITY,PAYMENT,OTHER,COURSE,NOTIFY,CONTENT,REVIEWS,REPORTS -c yellow,green,blue,cyan,red,white,brown,pink,yellow,blue,green,red \"npm run start:gateway\" \"npm run start:auth\" \"npm run start:merchant\" \"npm run start:student\" \"npm run start:activity\" \"npm run start:payment\" \"npm run start:other\" \"npm run start:course\" \"npm run start:notification\" \"npm run start:content\" \"npm run start:reviews\" \"npm run start:reports\" ",
+    "dev": "npm run start:all",
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.1",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

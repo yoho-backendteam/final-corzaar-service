@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enrollment Application - Corzaar Academy</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      color: #333;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    h1 {
+      color: #003366;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    h2 {
+      color: #007BFF;
+      font-size: 18px;
+      margin-top: 20px;
+      border-bottom: 2px solid #007BFF;
+      padding-bottom: 6px;
+    }
+
+    p {
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      h1 { font-size: 20px; }
+      h2 { font-size: 16px; }
+      p, th, td { font-size: 13px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Corzaar Academy</h1>
+    <p style="text-align:center;">Official Enrollment Application</p>
+
+    <h2>Enrollment Details</h2>
+    <p><strong>Status:</strong> {{enrollment.status}}</p>
+    <p><strong>Date:</strong> {{formatDate enrollment.createdAt}}</p>
+
+
+    <h2>Student Information</h2>
+<p><strong>Name:</strong> {{enrollment.billing.firstName}} {{enrollment.billing.lastName}}</p>
+<p><strong>Email:</strong> {{enrollment.billing.email}}</p>
+<p><strong>Phone:</strong> {{enrollment.billing.phone}}</p>
+<p><strong>Current Address:</strong>
+  {{enrollment.billing.address.current.street}},
+  {{enrollment.billing.address.current.city}},
+  {{enrollment.billing.address.current.state}},
+  {{enrollment.billing.address.current.zipCode}},
+  {{enrollment.billing.address.current.country}}
+</p>
+
+    <h2>Course Details</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Course Title</th>
+      <th>Price</th>
+      <th>Discount</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each enrollment.items}}
+    <tr>
+      <td>{{this.title}}</td>
+      <td>{{this.price}}</td>
+      <td>{{this.discountPrice}}</td>
+      <td>{{calcTotal this.price this.discountPrice}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+
+    <h2>Pricing Summary</h2>
+    <p><strong>Subtotal:</strong> {{enrollment.pricing.subtotal}} {{enrollment.pricing.currency}}</p>
+    <p><strong>Discount:</strong> {{enrollment.pricing.discount}} {{enrollment.pricing.currency}}</p>
+    <p><strong>Tax:</strong> {{enrollment.pricing.tax}} {{enrollment.pricing.currency}}</p>
+    <p><strong>Total:</strong> {{enrollment.pricing.total}} {{enrollment.pricing.currency}}</p>
+
+    <div class="footer">
+      Thank you for enrolling with Corzaar Academy.<br>
+      For support, contact <a href="mailto:support@corzaar.com">support@corzaar.com</a>.
+    </div>
+  </div>
+</body>
+</html>

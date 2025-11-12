@@ -1,0 +1,26 @@
+{
+  "name": "other-service",
+  "version": "1.0.0",
+  "description": "micro service for add-on services.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.0",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "joi": "^18.0.1",
+    "cors": "^2.8.5",
+    "mongoose": "^8.19.2",
+    "node-cron": "^4.2.1",
+    "nodemon": "^3.1.10",
+    "uuid": "^13.0.0"
+  }
+}

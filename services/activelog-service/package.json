@@ -1,0 +1,26 @@
+{
+  "name": "student-service",
+  "version": "1.0.0",
+  "description": "micro service for managa student profiles.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.0",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "joi": "^18.0.1",
+    "mongoose": "^8.19.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
