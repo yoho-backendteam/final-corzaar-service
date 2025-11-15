@@ -2,7 +2,6 @@ import express from "express";
 import routes from "./routes/index.js";
 import dotenv from "@dotenvx/dotenvx";
 import cors from "cors"
-import { createProxyMiddleware } from "http-proxy-middleware";
 dotenv.config()
 const server = express()
 
