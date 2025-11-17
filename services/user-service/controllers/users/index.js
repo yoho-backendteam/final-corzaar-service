@@ -1,6 +1,7 @@
-import { generateOtp } from "../../utils/AuthHelpers.js"
+import { generateOtp, JWTEncoded } from "../../utils/AuthHelpers.js"
 import { OtpModel } from "../../models/OtpModel.js"
 import { UserModel } from "../../models/usermodel.js"
+import bcrypt from "bcrypt"
 
 export const UsersMobileRegister = async(req,res)=>{
     try {
@@ -36,6 +37,29 @@ export const UsersMobileRegister = async(req,res)=>{
 
             res.status(200).json({status:true,message:"enter your otp",data:{otp,token}})
         }
+    } catch (error) {
+        res.status(500).json({status:false,message:error.message})
+    }
+}
+
+export const UsersRootLogin = async(req,res)=>{
+    try {
+        const {email,phoneNumber,password} = req.body
+        const user = await UserModel.findOne({$or:[{email},{phoneNumber}],ispass:false})
+        
+        if (!user) {
+           return res.status(200).json({status:false,message:"only accepted otp login in phone number."})   
+        }
+
+        const verify = bcrypt.compareSync(password,user?.password)
+
+        if (!verify) {
+            return res.status(400).json({status:false,message:"password incorrect."})
+        }
+
+        const token = await JWTEncoded({email:user?.email,_id:user?._id,OAuth_id:user?.OAuth_id,role:user?.role,phoneNumber:user?.phoneNumber})
+        res.status(200).json({status:true,message:"login success",data:token})
+
     } catch (error) {
         res.status(500).json({status:false,message:error.message})
     }

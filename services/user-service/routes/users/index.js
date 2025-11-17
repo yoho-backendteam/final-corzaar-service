@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { GetUserProfile, GetUserProfileById, UsersMobileRegister } from "../../controllers/users/index.js";
+import { GetUserProfile, GetUserProfileById, UsersMobileRegister, UsersRootLogin } from "../../controllers/users/index.js";
 import { verifyOtp } from "../../controllers/shared/index.js";
 import { AuthVerify } from "../../middelware/AuthVerify.js";
 
@@ -18,6 +18,7 @@ userRoute.get('/google/callback',
 );
 
 userRoute.post('/login',UsersMobileRegister)
+userRoute.post("/root-login",UsersRootLogin)
 
 userRoute.post('/verify-otp',verifyOtp)
 

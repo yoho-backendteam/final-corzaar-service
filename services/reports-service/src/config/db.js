@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const db = process.env.report_db || "report-test"
 
-const url = `mongodb+srv://yoho_db_users:kSNmUnKZnl3FCETd@corzaar.qqlripp.mongodb.net/${db}?retryWrites=true&w=majority&appName=corzaar`
+const url = `mongodb+srv://yoho_db_users:825le4CGbRwwGTx9@corzaar.qqlripp.mongodb.net/${db}?retryWrites=true&w=majority&appName=corzaar`
 
 const connectDB = async () =>{
     try {

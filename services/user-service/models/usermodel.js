@@ -19,14 +19,20 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber:{
         type:String,
-        unique:true,
     },
     email:{
         type:String,
-        unique:true,
     },
     password:{
         type:String,
+    },
+    ispass:{
+        type:Boolean,
+        default:false,
+    },
+    is_completed:{
+        type:Boolean,
+        default:false,
     },
     image:{
         type:String,

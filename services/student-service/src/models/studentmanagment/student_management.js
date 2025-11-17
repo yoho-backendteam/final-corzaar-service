@@ -12,45 +12,9 @@ const studentSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
-  studentName: {
-    type: String,
-    required: true
+  studentId:{
+    type:String
   },
-  instituteId:{
-    type:mongoose.Types.ObjectId,
-    ref: "Institute",
-  },
-
-   userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users"
-    },
-
-
-  rollNumber: { 
-    type: String,
-    required: true
- },
-
-  departmentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Departments"
-    },
-
-   programId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Programs"
-    },
-
-  semester: {
-     type: Number,
-     required: true
-     },
-
-  admissionDate: { 
-    type: Date, 
-    default: Date.now
- },
 
   status: {
     type: String,

@@ -3,11 +3,6 @@ import Joi from 'joi';
 export const studentJoiSchema = Joi.object({
   studentId: Joi.string(),
   userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-  insituteId:Joi.string(),
-  rollNumber: Joi.string().required(),
-  departmentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-  programId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-  semester: Joi.number().required(),
   admissionDate: Joi.date(),
   status: Joi.string().valid('active', 'inactive', 'graduated', 'dropped', 'suspended'),
 
@@ -42,30 +37,30 @@ export const studentJoiSchema = Joi.object({
     }).required()
   }).required(),
 
-  academicInfo: Joi.object({
-    previousEducation: Joi.array().items(
-      Joi.object({
-        level: Joi.string().required(),
-        institution: Joi.string().required(),
-        board: Joi.string(),
-        yearOfPassing: Joi.number().integer(),
-        percentage: Joi.number().min(0).max(100),
-        subjects: Joi.array().items(Joi.string())
-      })
-    ),
-    currentGPA: Joi.number().min(0).max(10),
-    totalCredits: Joi.number().default(0),
-    completedCredits: Joi.number().default(0)
-  }).required(),
+  // academicInfo: Joi.object({
+  //   previousEducation: Joi.array().items(
+  //     Joi.object({
+  //       level: Joi.string().required(),
+  //       institution: Joi.string().required(),
+  //       board: Joi.string(),
+  //       yearOfPassing: Joi.number().integer(),
+  //       percentage: Joi.number().min(0).max(100),
+  //       subjects: Joi.array().items(Joi.string())
+  //     })
+  //   ),
+  //   currentGPA: Joi.number().min(0).max(10),
+  //   totalCredits: Joi.number().default(0),
+  //   completedCredits: Joi.number().default(0)
+  // }).required(),
 
-  documents: Joi.array().items(
-    Joi.object({
-      type: Joi.string().required(),
-      name: Joi.string().required(),
-      url: Joi.string().uri().required(),
-      uploadedAt: Joi.date()
-    })
-  ).required()
+  // documents: Joi.array().items(
+  //   Joi.object({
+  //     type: Joi.string().required(),
+  //     name: Joi.string().required(),
+  //     url: Joi.string().uri().required(),
+  //     uploadedAt: Joi.date()
+  //   })
+  // ).required()
 });
 
 
