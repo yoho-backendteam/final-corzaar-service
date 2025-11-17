@@ -15,6 +15,10 @@ const studentSchema = new mongoose.Schema({
   studentId:{
     type:String
   },
+  fullName:{
+    type:String,
+    required:true
+  },
 
   status: {
     type: String,

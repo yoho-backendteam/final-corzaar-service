@@ -22,7 +22,8 @@ export const createStudent = async (req, res) => {
     const newStudent = new student_management({
       _id: new mongoose.Types.ObjectId(),
       userId:user?._id,
-      ...value
+      ...value,
+      fullName:value?.personalInfo?.fullName
     });
 
   

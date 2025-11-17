@@ -14,7 +14,7 @@ export const calculateTotals = (items = [], coupon = null) => {
 };
 
 export const GetCourseDataByid=async(id)=>{
- const res =axios.get(`${process.env.course_url}/api/courses/getCourseById/${id}`,{
+ const res = axios.get(`${process.env.course_url}/api/courses/getCourseById/${id}`,{
     headers:{user:JSON.stringify({role:"open"})}
   })
   .then((response)=>{
@@ -25,4 +25,8 @@ export const GetCourseDataByid=async(id)=>{
   })
 
   return res
+}
+
+export const UpdateProfileFlagAxios=async(id)=>{
+  await axios.patch(`${process.env.course_url}/api/users/iscompleted/${id}`)
 }

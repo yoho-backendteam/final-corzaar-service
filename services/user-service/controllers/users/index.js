@@ -85,3 +85,14 @@ export const GetUserProfileById=async(req,res)=>{
         res.status(500).json({status:false,message:error.message})
     }
 }
+
+export const UpdateProfileComplted=async(req,res)=>{
+    try {
+        const {id} = req.params
+        await UserModel.updateOne({_id:id},{is_completed:true})
+
+        res.status(200).json({status:true,message:"profile data fetched"})
+    } catch (error) {
+        res.status(500).json({status:false,message:error.message})
+    }
+}
