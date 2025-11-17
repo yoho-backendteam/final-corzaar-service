@@ -9,9 +9,9 @@ import{addInstituteFav, getInstituteFav, removeInstituteFav} from "../../control
 import { checkoutAllCart, checkoutDirectCourse, checkoutSingleCartItem } from "../../controllers/cartcontroller/index.js"
 export const cartroute = express.Router()
 
-cartroute.post('/addtocart',addToCart)
+cartroute.post('/addtocart/:courseId',addToCart)
 cartroute.delete('/remove/:id',validateRequest(removeItemValidator) ,removeItem)
-cartroute.get('/',validateRequest(getCartValidator),getCart)
+cartroute.get('/',getCart)
 cartroute.delete('/clear',clearCart)
 cartroute.post('/apply-coupon',applyCoupon)
 cartroute.delete('/remove-coupon',removeCoupon)
