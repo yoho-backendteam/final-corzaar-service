@@ -50,7 +50,7 @@ const LocationSchema = new Schema({
     required: true,
   },
   coordinates: {
-    type: [Number], // [longitude, latitude]
+    type: [Number], 
     required: true,
   },
 });
@@ -99,7 +99,6 @@ const SettingsSchema = new Schema({
   commissionRate: Number,
 });
 
-// ==================== Main Institute Schema ====================
 const InstituteSchema = new Schema(
   {
     uuid: { type: String, required: true, unique: true },
