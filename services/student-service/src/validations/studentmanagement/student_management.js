@@ -7,7 +7,11 @@ export const studentJoiSchema = Joi.object({
   status: Joi.string().valid('active', 'inactive', 'graduated', 'dropped', 'suspended'),
 
   personalInfo: Joi.object({
-    dateOfBirth: Joi.date().required(),
+    firstName:Joi.string(),
+    lastName:Joi.string(),
+    email:Joi.string().email(),
+    fullName:Joi.string(),
+    dateOfBirth: Joi.string().required(),
     gender: Joi.string().valid('male', 'female', 'other').required(),
     bloodGroup: Joi.string(),
     nationality: Joi.string(),

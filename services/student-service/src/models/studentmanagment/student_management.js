@@ -28,7 +28,7 @@ const studentSchema = new mongoose.Schema({
     lastName:{type:String},
     phoneNumber:{type:Number},
     email:{type:String},
-    dateOfBirth: { type: Date },
+    dateOfBirth: { type: String },
     gender: { type: String },
     bloodGroup: { type: String },
     nationality: { type: String },

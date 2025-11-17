@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const db = process.env.student_db || "dev-v1"
+const db = process.env.student_db || "checking"
 
 const uri = `mongodb+srv://yoho_db_users:825le4CGbRwwGTx9@corzaar.qqlripp.mongodb.net/${db}?retryWrites=true&w=majority&appName=corzaar`
 
