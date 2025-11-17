@@ -68,7 +68,8 @@ export const getAllOrdersController = async (req, res) => {
     const orders = await Enrollment.find(query)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate("userId");
 
     const totalOrders = await Enrollment.countDocuments(query);
 
@@ -145,3 +146,38 @@ export const getOrderById = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+export const updateEnrollment = async(req,res)=>{
+  try {
+
+    const {id} = req.params
+    const {status} = req.body
+
+    const enrollment = await Enrollment.findByIdAndUpdate({_id:id}, {status}, {new: true})
+    if(!enrollment)  return res.status(404).json({
+      success: false,
+      message: "Enrollment not found.",
+      
+    })
+
+    res.status(200).json({
+      success: true,
+      message: "Enrollment updated successfully",
+      data: enrollment
+    })
+    
+  } catch (error) {
+    console.error("Error retrieving order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while retrieving order.",
+      error: error.message
+    });
+  }
+}
