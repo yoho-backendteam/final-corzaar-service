@@ -10,6 +10,7 @@ import { validateCreatePlacement, validateUpdatePlacement } from "../middlewares
 import dashroute from './dashboardRoutes.js'
 import AttendanceRoute from "./AttendanceManagement/index.js";
 import { PermissionVerify } from "../../middelware/index.js";
+import categoryroute from "./category/categoryroutes.js";
 
 
 export const route = express.Router()
@@ -41,6 +42,8 @@ route.get('/placement/getbyUUID/:uuid', getPlacementByUUID);
 route.put('/placement/updatebyUUID/:uuid',PermissionVerify(["merchant"]), updatePlacementByUUID);
 route.delete('/placement/deletebyUUID/:uuid',PermissionVerify(["merchant"]), deletePlacementByUUID);
 route.get('/placement/getbyid/:studentId', getPlacementsByStudent);
+
+route.use('/category',categoryroute)
 
 route.use('/dashboard',dashroute)
 

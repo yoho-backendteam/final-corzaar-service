@@ -2,31 +2,28 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 const lessonSchema = new mongoose.Schema({
-  lessonId: { type: String, default: uuidv4, unique: true },
-  title: { type: String, required: [true, "Lesson title is required"] },
-  type: { 
-    type: String, 
-    enum: ["video", "text", "quiz", "assignment"], 
-    default: "video" 
-  },
-  duration: { type: Number, min: 0 },
+  lessonId: { type: String, default: uuidv4 },
+  title: { type: String, required: true },
+  type: { type: String, enum: ["video", "text", "quiz", "assignment"], default: "video" },
+  duration: Number,
   content: {
-    videoUrl: { type: String, trim: true },
-    textContent: { type: String },
-    quizData: { type: Object },
-    assignmentData: { type: Object },
+    videoUrl: String,
+    textContent: String,
+    quizData: Object,
+    assignmentData: Object,
   },
-  order: { type: Number, min: 0 },
+  order: Number,
   isPreview: { type: Boolean, default: false },
 });
 
 const moduleSchema = new mongoose.Schema({
-  moduleId: { type: String, default: uuidv4, unique: true },
-  title: { type: String, required: [true, "Module title is required"] },
-  description: { type: String },
-  order: { type: Number, min: 0 },
+  moduleId: { type: String, default: uuidv4 },
+  title: { type: String, required: true },
+  description: String,
+  order: Number,
   lessons: { type: [lessonSchema], default: [] },
 });
+
 
 const courseSchema = new mongoose.Schema(
   {
