@@ -5,14 +5,15 @@ import { createCourseSchema, updateCourseSchema } from "../validations/courseVal
 
 //  Create Course
 export const createCourse = async (req, res) => {
-  const user = req.user
+  const user = req.user;
 
-  const {data} = await GetInstituteByUserId(user?._id)
-
+ 
+  const { data } = await GetInstituteByUserId(user?._id);
 
   if (!data) {
-     return res.status(404).json({status:false,message:"institute not found your id"})
+    return res.status(404).json({ status: false, message: "institute not found your id" });
   }
+
   const { error, value } = createCourseSchema.validate(req.body, {
     abortEarly: false,
     stripUnknown: true,
@@ -26,17 +27,19 @@ export const createCourse = async (req, res) => {
   }
 
   try {
-    const course = new Course({...value,instituteId:data._id});
+    const course = new Course({ ...value, instituteId: data._id });
     await course.save();
-    res.status(201).json({ 
-      message: "Course created successfully", 
-      data: course 
+
+    res.status(201).json({
+      message: "Course created successfully",
+      data: course
     });
   } catch (err) {
     console.error("Create Course Error:", err);
     res.status(500).json({ message: "Server error creating course", error: err.message });
   }
 };
+
 
 
 //  Get All Courses 
