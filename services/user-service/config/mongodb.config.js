@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const uri = `mongodb+srv://yoho_db_users:kSNmUnKZnl3FCETd@corzaar.qqlripp.mongodb.net/checking?retryWrites=true&w=majority&appName=corzaar`
+const uri = `mongodb+srv://yoho_db_users:825le4CGbRwwGTx9@corzaar.qqlripp.mongodb.net/checking?retryWrites=true&w=majority&appName=corzaar`
 
 const connectionOption = {}
 

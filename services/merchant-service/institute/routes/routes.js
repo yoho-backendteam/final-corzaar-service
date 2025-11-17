@@ -17,7 +17,7 @@ export const route = express.Router()
 route.post("/",PermissionVerify(["merchant"]), createInstitute);
 route.get("/getall",getInstitutes)
 route.get('/getbyid/:id',getByIdInstitutes)
-route.put('/update/:id',PermissionVerify(["merchant"]),updateInstitute)
+route.put('/update/:id',PermissionVerify(["merchant","admin"]),updateInstitute)
 route.delete('/delete/:id',PermissionVerify(["merchant"]),deleteinstitutebyid)
 route.get("/getall/:id/students",getInstitutesStudents)
 route.get("/getall/:id/courses",getInstituteCourses)
