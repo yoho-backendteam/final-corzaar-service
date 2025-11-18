@@ -39,16 +39,21 @@ const courseSchema = new mongoose.Schema(
     thumbnail: { type: String },
     previewVideo: { type: String },
 
-    instituteId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Institute",
-      required: true
-    },
-    branchId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Branch",
-      required: true
-    },
+    // instituteId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Institute",
+    //   required: true
+    // },
+    // branchId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Branch",
+    //   required: true
+    // },
+    instituteId: { type: String ,required:true},
+    branchId: { type: String },
+    students: {type: String},
+    batches: {type: String},
+    duration: {type: String},
     category: {
       primary: { type: String },
       secondary: { type: [String], default: [] },
