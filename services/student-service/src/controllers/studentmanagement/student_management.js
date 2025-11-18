@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import student_management from '../../models/studentmanagment/student_management.js';
 import { studentJoiSchema, studentUpdateJoiSchema } from '../../validations/studentmanagement/student_management.js';
+import { UpdateProfileFlagAxios } from '../../utils/cart/index.js';
 
 
 
@@ -28,6 +29,8 @@ export const createStudent = async (req, res) => {
 
   
     const savedStudent = await newStudent.save();
+
+    UpdateProfileFlagAxios(user?._id)
 
     res.status(201).json({
       success: true,
