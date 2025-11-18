@@ -1,22 +1,77 @@
-import { getData } from "../utils/apiHelper.js";
-import dotenv from "dotenv"
-dotenv.config()
-export const getDashboardData = async (req, res) => {
-  try {
-    const [
-      coursesResponse,
-      studentsResponse,
-      notificationResponse,
-      recentResponse,
-      batchResponse,
-    ] = await Promise.all([
-      getData(`${process.env.course_url}/api/courses`),
-      getData(`${process.env.merchant_url}/merchant/getall`),
-      getData("http://localhost:3005/api?type=merchant"),
-      getData("http://localhost:3003/api/enrollment/getall"),
-      getData("http://localhost:3004/api/courses/batch/8fc9551b9818562f4a3299c"),
-    ]);
+import dotenv from "dotenv";
+dotenv.config();
 
+import axios from "axios";
+
+export const getData = async (url, options = {}) => {
+  try {
+    const response = await axios.get(url, {
+      timeout: 8000,
+      ...options, 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error fetching:", url, error.message);
+    throw error;
+  }
+};
+
+const merchantHeader = (user) => ({
+  headers: {
+    user: JSON.stringify({
+      _id: user._id,          role: user.role,  
+    }),
+  },
+});
+
+export const getDashboardData = async (req, res) => {
+  const user = req.user; 
+
+  try {
+    console.log("➡ TEST 1: Calling APIs...");
+
+    const safeCall = async (name, fn) => {
+      console.time(name);
+      try {
+        const data = await fn;
+        console.timeEnd(name);
+        return data;
+      } catch (err) {
+        console.timeEnd(name);
+        console.error(`❌ ERROR in ${name}:`, err.message);
+        return null;
+      }
+    };
+    
+    const coursesResponse = await safeCall(
+      "courses",
+      getData(`${process.env.course_url}/api/courses`, merchantHeader(user))
+    );
+
+    const studentsResponse = await safeCall(
+      "students",
+      getData(`${process.env.merchant_url}/api/getall`)
+    );
+
+    const notificationResponse = await safeCall(
+      "notifications",
+      getData(`${process.env.payment_url}/api?type=merchant`)
+    );
+
+    const recentResponse = await safeCall(
+      "enrollments",
+      getData(`${process.env.student_url}/api/enrollment/getall`)
+    );
+
+    const batchResponse = await safeCall(
+      "batches",
+      getData(
+        `${process.env.course_url}/api/courses/getCourseBymerchant`,
+        merchantHeader(user)
+      )
+    );
+
+    // ----------- SAFE DATA EXTRACTION -----------
     const courses = coursesResponse?.data || [];
     const students = studentsResponse?.data || [];
     const notifications = notificationResponse?.data || [];
@@ -26,6 +81,7 @@ export const getDashboardData = async (req, res) => {
       ? batchResponse.data
       : batchResponse?.data?.data || [];
 
+    // ----------- TRANSFORM DATA -----------
     const activeCourses = courses.filter((course) => course.is_active === true);
 
     const recentNotifications = [...notifications]
@@ -73,8 +129,9 @@ export const getDashboardData = async (req, res) => {
           }))
       : [];
 
+    // ----------- SEND RESPONSE -----------
     res.status(200).json({
-      status : "Success",
+      status: "Success",
       message: "Dashboard data fetched successfully",
       success: true,
       summary: {

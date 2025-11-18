@@ -37,7 +37,9 @@ const courseSchema = new mongoose.Schema(
 
     instituteId: { type: String ,required:true},
     branchId: { type: String },
-
+    students: {type: String},
+    batches: {type: String},
+    duration: {type: String},
     category: {
       primary: { type: String },
       secondary: { type: [String], default: [] },

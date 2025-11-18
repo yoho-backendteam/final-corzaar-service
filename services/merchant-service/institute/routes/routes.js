@@ -45,7 +45,7 @@ route.get('/placement/getbyid/:studentId', getPlacementsByStudent);
 
 route.use('/category',categoryroute)
 
-route.use('/dashboard',dashroute)
+route.use('/dashboard',PermissionVerify(["merchant"]),dashroute)
 
 route.use("/attendance",AttendanceRoute)
 
