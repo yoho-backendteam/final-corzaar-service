@@ -5,13 +5,12 @@ import { createCourseSchema, updateCourseSchema } from "../validations/courseVal
 
 //  Create Course
 export const createCourse = async (req, res) => {
-  const user = req.user;
+  const user = req.user
 
- 
-  const { data } = await GetInstituteByUserId(user?._id);
+  const { data } = await GetInstituteByUserId(user?._id)
 
   if (!data) {
-    return res.status(404).json({ status: false, message: "institute not found your id" });
+    return res.status(404).json({ status: false, message: "institute not found your id" })
   }
 
   const { error, value } = createCourseSchema.validate(req.body, {
@@ -29,7 +28,6 @@ export const createCourse = async (req, res) => {
   try {
     const course = new Course({ ...value, instituteId: data._id });
     await course.save();
-
     res.status(201).json({
       message: "Course created successfully",
       data: course
@@ -49,12 +47,12 @@ export const getCourses = async (req, res) => {
 
     const filter = q
       ? {
-          $or: [
-            { title: new RegExp(q, "i") },
-            { "category.primary": new RegExp(q, "i") },
-            { "category.tags": new RegExp(q, "i") },
-          ],
-        }
+        $or: [
+          { title: new RegExp(q, "i") },
+          { "category.primary": new RegExp(q, "i") },
+          { "category.tags": new RegExp(q, "i") },
+        ],
+      }
       : {};
 
     const total = await Course.countDocuments(filter);
@@ -80,7 +78,7 @@ export const getCourses = async (req, res) => {
 
 export const getallcorses = async (req, res) => {
   try {
-    const courses = await Course.find({is_active:true});
+    const courses = await Course.find({ is_active: true });
     res.json(courses);
   } catch (error) {
     console.error("Get All Courses Error:", error);
@@ -93,9 +91,9 @@ export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ message: "Course not found" });
-    res.json({ 
-      message: "Course retrieved successfully", 
-      data: course 
+    res.json({
+      message: "Course retrieved successfully",
+      data: course
     });
   } catch (error) {
     console.error("Get Course Error:", error);
@@ -106,8 +104,8 @@ export const getCourseById = async (req, res) => {
 export const getCourseByInstitute = async (req, res) => {
   try {
     const user = req.user
-    const {data} = await GetInstituteByUserId(user?._id)
-    const course = await Course.find({instituteId:data?._id});
+    const { data } = await GetInstituteByUserId(user?._id)
+    const course = await Course.find({ instituteId: data?._id });
     if (!course) return res.status(404).json({ message: "Course not found" });
     res.json(course);
   } catch (error) {
@@ -118,7 +116,7 @@ export const getCourseByInstitute = async (req, res) => {
 
 export const getCourseByBranch = async (req, res) => {
   try {
-    const course = await Course.findById({branchId:req.params.id});
+    const course = await Course.findById({ branchId: req.params.id });
     if (!course) return res.status(404).json({ message: "Course not found" });
     res.json(course);
   } catch (error) {
@@ -152,9 +150,9 @@ export const updateCourse = async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    res.json({ 
-      message: "Course updated successfully", 
-      data: updated 
+    res.json({
+      message: "Course updated successfully",
+      data: updated
     });
   } catch (error) {
     console.error("Update Course Error:", error);
@@ -187,9 +185,9 @@ export const searchCourses = async (req, res) => {
         { "category.tags": { $regex: query, $options: "i" } },
       ],
     });
-    res.json({ 
-      message: "Courses search completed successfully", 
-      data: courses 
+    res.json({
+      message: "Courses search completed successfully",
+      data: courses
     });
   } catch (err) {
     console.error("Search Courses Error:", err);
@@ -202,9 +200,9 @@ export const searchCourses = async (req, res) => {
 export const getCategories = async (req, res) => {
   try {
     const categories = await Course.find();
-    res.json({ 
-      message: "Categories retrieved successfully", 
-      data: categories 
+    res.json({
+      message: "Categories retrieved successfully",
+      data: categories
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching categories", error: err.message });
@@ -215,9 +213,9 @@ export const getCategories = async (req, res) => {
 export const getFeaturedCourses = async (req, res) => {
   try {
     const courses = await Course.find().sort({ createdAt: -1 }).limit(5);
-    res.json({ 
-      message: "Featured courses retrieved successfully", 
-      data: courses 
+    res.json({
+      message: "Featured courses retrieved successfully",
+      data: courses
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching featured courses", error: err.message });
@@ -228,11 +226,126 @@ export const getFeaturedCourses = async (req, res) => {
 export const getTrendingCourses = async (req, res) => {
   try {
     const courses = await Course.find().sort({ "reviews.length": -1 }).limit(5);
-    res.json({ 
-      message: "Trending courses retrieved successfully", 
-      data: courses 
+    res.json({
+      message: "Trending courses retrieved successfully",
+      data: courses
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching trending courses", error: err.message });
   }
 };
+
+
+export const filterCourses = async (req, res) => {
+  try {
+    const {
+      categories,
+      levels,
+      minRating,
+      minPrice,
+      maxPrice,
+      modes,
+      locationRadius,
+      latitude,
+      longitude,
+      page = 1,
+      limit = 10,
+    } = req.query;
+    const filter = { is_active: true };
+    if (categories) {
+      const categoryArray = categories.split(',').map(c => c.trim());
+      filter.$or = [
+        { "category.primary": { $in: categoryArray.map(c => new RegExp(c, "i")) } },
+        { "category.secondary": { $in: categoryArray.map(c => new RegExp(c, "i")) } },
+        { "category.tags": { $in: categoryArray.map(c => new RegExp(c, "i")) } }
+      ];
+    }
+    if (levels) {
+      const levelArray = levels.split(',').map(l => l.trim().toLowerCase());
+      filter.level = { $in: levelArray };
+    }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter["pricing.price"] = {};
+      if (minPrice !== undefined) {
+        filter["pricing.price"].$gte = parseFloat(minPrice);
+      }
+      if (maxPrice !== undefined) {
+        filter["pricing.price"].$lte = parseFloat(maxPrice);
+      }
+    }
+    if (modes) {
+      const modeArray = modes.split(',').map(m => m.trim().toLowerCase());
+      filter.mode = { $in: modeArray };
+    }
+    let coursesQuery = Course.find(filter)
+      .populate('branchId')
+      .sort({ createdAt: -1 });
+    let courses = await coursesQuery;
+    if (minRating) {
+      const minRatingFloat = parseFloat(minRating);
+      courses = courses.filter(course => {
+        if (!course.reviews || course.reviews.length === 0) return false;
+
+        const avgRating = course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length;
+        return avgRating >= minRatingFloat;
+      });
+    }
+    if (locationRadius && latitude && longitude) {
+      const userLat = parseFloat(latitude);
+      const userLng = parseFloat(longitude);
+      const radiusInKm = parseFloat(locationRadius);
+
+      courses = courses.filter(course => {
+        if (!course.branchId || !course.branchId.location || !course.branchId.location.coordinates) {
+          return false;
+        }
+
+        const [branchLng, branchLat] = course.branchId.location.coordinates;
+        const distance = calculateDistance(userLat, userLng, branchLat, branchLng);
+        return distance <= radiusInKm;
+      });
+    }
+    const total = courses.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedCourses = courses.slice(startIndex, endIndex);
+
+    res.json({
+      message: "Filtered courses retrieved successfully",
+      total: total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      limit: parseInt(limit),
+      data: paginatedCourses,
+      appliedFilters: {
+        categories: categories?.split(',') || [],
+        levels: levels?.split(',') || [],
+        minRating: minRating || null,
+        priceRange: {
+          min: minPrice ? parseFloat(minPrice) : 0,
+          max: maxPrice ? parseFloat(maxPrice) : null
+        },
+        modes: modes?.split(',') || [],
+        locationRadius: locationRadius || null
+      }
+    });
+  } catch (error) {
+    console.error("Filter Courses Error:", error);
+    res.status(500).json({
+      message: "Server error filtering courses",
+      error: error.message
+    });
+  }
+};
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}

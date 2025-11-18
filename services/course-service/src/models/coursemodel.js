@@ -2,10 +2,14 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 const lessonSchema = new mongoose.Schema({
-  lessonId: { type: String, default: uuidv4 },
-  title: { type: String, required: true },
-  type: { type: String, enum: ["video", "text", "quiz", "assignment"], default: "video" },
-  duration: Number,
+  lessonId: { type: String, default: uuidv4, unique: true },
+  title: { type: String, required: [true, "Lesson title is required"] },
+  type: {
+    type: String,
+    enum: ["video", "text", "quiz", "assignment"],
+    default: "video"
+  },
+  duration: { type: Number, min: 0 },
   content: {
     videoUrl: String,
     textContent: String,
@@ -35,9 +39,16 @@ const courseSchema = new mongoose.Schema(
     thumbnail: { type: String },
     previewVideo: { type: String },
 
-    instituteId: { type: String ,required:true},
-    branchId: { type: String },
-
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true
+    },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true
+    },
     category: {
       primary: { type: String },
       secondary: { type: [String], default: [] },

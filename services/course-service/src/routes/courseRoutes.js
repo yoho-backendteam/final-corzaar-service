@@ -11,7 +11,8 @@ import {
   getTrendingCourses,
   getallcorses,
   getCourseByInstitute,
-  getCourseByBranch
+  getCourseByBranch,
+  filterCourses
 } from "../controllers/courseController.js";
 import contentRoutes from "../routes/coursecontent/routes.js"; 
 import reviewRoutes from "../routes/coursereview/routes.js";
@@ -22,6 +23,7 @@ import { PermissionVerify } from "../middelwares/index.js";
 
 const router = express.Router();
 
+router.get("/filter", PermissionVerify(["open","merchant","admin"]), filterCourses);
 router.get("/search",PermissionVerify(["open","merchant","admin"]), searchCourses);
 router.get("/categories",PermissionVerify(["open","merchant","admin"]), getCategories);
 router.get("/featured",PermissionVerify(["open","merchant","admin"]), getFeaturedCourses);
