@@ -165,6 +165,17 @@ export const getInstitutesByUserId = async (req, res) => {
   }
 };
 
+export const getInstituteForCourse = async (req, res) => {
+  try {
+    const { id } = req.params
+    const institutes = await Institute.findOne({ _id: id }).select("uuid _id name logo")
+
+    return successResponse(res, "Institutes fetched successfully", institutes);
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
 
 export const getByIdInstitutes = async (req, res) => {
   try {

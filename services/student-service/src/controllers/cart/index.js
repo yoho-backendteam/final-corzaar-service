@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from "../../utils/index.js";
 import { calculateTotals } from "../../utils/index.js";
 import CartCourses from "../../models/cart/index.js";
 import Student from "../../models/studentmanagment/student_management.js";
-import { GetCourseDataByid } from "../../utils/cart/index.js";
+import { GetCourseDataByid, GetCourseDataForCart } from "../../utils/cart/index.js";
 
 export const addToCart = async (req, res) => {
   try {
@@ -125,7 +125,11 @@ export const getCart = async (req, res) => {
 
     if (!cart) return errorResponse(res, "No active cart found for this user");
 
-    return successResponse(res, "Cart retrieved successfully", cart);
+    const {data} = await GetCourseDataForCart({item:cart?.items})
+
+    const output = {...cart._doc,items:data}
+
+    return successResponse(res, "Cart retrieved successfully", output);
   } catch (err) {
     return errorResponse(res, err.message || "Server error");
   }

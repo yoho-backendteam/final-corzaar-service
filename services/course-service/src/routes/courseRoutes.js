@@ -12,12 +12,14 @@ import {
   getallcorses,
   getCourseByInstitute,
   getCourseByBranch,
-  filterCourses
+  filterCourses,
+  GetCartCourseData
 } from "../controllers/courseController.js";
 import contentRoutes from "../routes/coursecontent/routes.js"; 
 import reviewRoutes from "../routes/coursereview/routes.js";
 import { authorize } from "../middelwares/authorizationClient.js";
 import { PermissionVerify } from "../middelwares/index.js";
+import route from "../../../merchant-service/institute/routes/routes.js";
 
 
 
@@ -41,6 +43,8 @@ router.put("/:id",
 router.delete("/:id",
   PermissionVerify(["merchant"]),
    deleteCourse);
+
+router.post("/courseincart",PermissionVerify(["open"]),GetCartCourseData)
 
 router.use("/:id/content", contentRoutes);
 router.use("/:id/reviews", reviewRoutes);

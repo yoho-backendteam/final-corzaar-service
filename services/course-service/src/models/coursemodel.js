@@ -39,18 +39,15 @@ const courseSchema = new mongoose.Schema(
     thumbnail: { type: String },
     previewVideo: { type: String },
 
-    // instituteId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Institute",
-    //   required: true
-    // },
-    // branchId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Branch",
-    //   required: true
-    // },
-    instituteId: { type: String ,required:true},
-    branchId: { type: String },
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+
     students: {type: String},
     batches: {type: String},
     duration: {type: String},
@@ -107,11 +104,6 @@ const courseSchema = new mongoose.Schema(
       },
     ],
 
-    uuid: {
-      type: String,
-      unique: true,
-      default: uuidv4
-    },
     is_active: {
       type: Boolean,
       default: true
@@ -121,4 +113,4 @@ const courseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Course = mongoose.models.Course || mongoose.model("Course", courseSchema);
+export const Course = mongoose.model("Course", courseSchema);

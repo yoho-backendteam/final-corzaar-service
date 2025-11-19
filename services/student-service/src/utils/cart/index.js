@@ -27,6 +27,20 @@ export const GetCourseDataByid=async(id)=>{
   return res
 }
 
+export const GetCourseDataForCart=async(data)=>{
+ const res = axios.post(`${process.env.course_url}/api/courses/courseincart`,data,{
+    headers:{user:JSON.stringify({role:"open"})}
+  })
+  .then((response)=>{
+    return response?.data
+  })
+  .catch((err)=>{
+    console.error("course fetching error:",err)
+  })
+
+  return res
+}
+
 export const UpdateProfileFlagAxios=async(id)=>{
   await axios.patch(`${process.env.course_url}/api/users/iscompleted/${id}`)
 }

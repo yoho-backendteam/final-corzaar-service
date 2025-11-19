@@ -1,5 +1,5 @@
 import { Course } from "../models/coursemodel.js";
-import { GetInstituteByUserId } from "../utils/axiosHelpers.js";
+import { GetInstituteBId, GetInstituteByUserId } from "../utils/axiosHelpers.js";
 import { createCourseSchema, updateCourseSchema } from "../validations/courseValidation.js";
 
 
@@ -348,4 +348,30 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+
+export const GetCartCourseData = async(req,res)=>{
+  try {
+    const {item} = req.body
+
+    let finaldata = [];
+
+    for (let index of item) {
+       let course = await Course.findOne({_id:index}).select("_id uuid title shortDescription instituteId branchId duration pricing")
+
+      if (course) {
+  
+        const {data} = await GetInstituteBId(course?.instituteId)
+
+        let obj ={...course._doc,instituteId:data}  
+  
+        finaldata.push(obj)
+      }
+    }
+
+    res.status(200).json({status:true,message:"cart course fetched",data:finaldata})
+  } catch (error) {
+    res.status(500).json({stauts:false,message:"internal server error"})
+  }
 }

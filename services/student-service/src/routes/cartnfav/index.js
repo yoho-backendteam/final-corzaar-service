@@ -16,7 +16,7 @@ cartroute.delete('/clear',clearCart)
 cartroute.post('/apply-coupon',applyCoupon)
 cartroute.delete('/remove-coupon',removeCoupon)
 
-cartroute.post("/checkout", checkoutAllCart);
+cartroute.post("/checkout/:cartId", checkoutAllCart);
 cartroute.post("/checkout/single", checkoutSingleCartItem);
 cartroute.post("/buy", checkoutDirectCourse);
 //fav
