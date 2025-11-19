@@ -23,7 +23,7 @@ export const verifyOtp = async (req,res) => {
             }else if (otps.role == "merchant") {
                 const user = await MerchantModel.findOne({phoneNumber:otps?.phoneNumber})
                 const token = await JWTEncoded({email:user?.email,_id:user?._id,OAuth_id:user?.OAuth_id,role:user?.role,phoneNumber:user?.phoneNumber})
-                return res.status(200).json({status:true,message:"login success",data:token})
+                return res.status(200).json({status:true,message:"login success",data:token,reg:user?.is_completed})
             }else if (otps.role == "admin") {
                 const user = await AdminModel.findOne({email:otps?.email})
                 const token = await JWTEncoded({email:user?.email,_id:user?._id,OAuth_id:user?.OAuth_id,role:user?.role,phoneNumber:user?.phoneNumber})
