@@ -11,7 +11,7 @@ const querySchema = new mongoose.Schema(
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin_Register",
-      required: true,
+      
     },
     senderRole: {
       type: String,
