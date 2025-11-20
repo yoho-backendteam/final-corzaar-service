@@ -5,6 +5,7 @@ import { errorResponse, generateUUID, successResponse, validateCoordinates } fro
 import dotenv from "dotenv"
 dotenv.config()
 import Branch from "../models/branchSchema.js";
+import { ProfileUpdate } from "../utils/apiHelper.js";
 
 
 export const createInstitute = async (req, res) => {
@@ -41,6 +42,8 @@ export const createInstitute = async (req, res) => {
     });
 
     await mainBranch.save();
+
+    await ProfileUpdate(user?._id)
 
     return successResponse(res, "Institute and main branch created successfully", {
       institute,

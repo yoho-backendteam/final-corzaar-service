@@ -43,21 +43,21 @@ const studentSchema = new mongoose.Schema({
         street: { type: String },
         city: { type: String },
         state: { type: String },
-        zipCode: { type: Number },
+        zipCode: { type: String },
         country: { type: String }
       },
       current: {
         street: { type: String },
         city: { type: String },
         state: { type: String },
-        zipCode: { type: Number },
+        zipCode: { type: String },
         country: { type: String }
       }
     },
     emergencyContact: {
       name: { type: String },
       relationship: { type: String },
-      phone: { type: Number},
+      phone: { type: String},
       email: { type: String }
     }
   },

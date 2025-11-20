@@ -22,14 +22,14 @@ export const studentJoiSchema = Joi.object({
         street: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string().required(),
-        zipCode: Joi.number().required(),
+        zipCode: Joi.string().required(),
         country: Joi.string().required()
       }).required(),
       current: Joi.object({
         street: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string().required(),
-        zipCode: Joi.number().required(),
+        zipCode: Joi.string().required(),
         country: Joi.string().required()
       }).required()
     }).required(),
