@@ -65,7 +65,6 @@ export const AuthVerify=async(req,res,next)=>{
                 }else if(decoded.role === "admin"){
                     const response = await axios.get(`${process.env.auth_url}/api/admin/profile-gate/${decoded._id}`).catch((err)=>{console.log(err)})
                     const {user} = response.data
-                    console.log(user)
                     if (!user) {
                         return res.status(401).json({
                             success:false,
