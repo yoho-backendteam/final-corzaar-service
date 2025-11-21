@@ -387,7 +387,7 @@ export const getBatchByInstitute = async (req, res) => {
 
      const batches = await Batch.find({merchantId:data?._id,isdeleted:false})
 
-     res.status(201).json({
+     res.status(200).json({
             status: true,
             message: "get all batch successfully",
             data: batches
