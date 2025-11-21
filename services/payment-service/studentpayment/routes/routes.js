@@ -20,7 +20,6 @@ route.get('/student/search',trackPayments)
 route.get('/student/report',generateFinancialReport)
 route.get('/student/all/payments',getallpayementfull)
 
-route.use("/inspay",inspayRoutes)
 
 
 export default route
