@@ -27,6 +27,7 @@ export const createCourse = async (req, res) => {
 
   try {
     const course = new Course({ ...value, instituteId: data._id });
+    console.log("course",course);
     await course.save();
     res.status(201).json({
       message: "Course created successfully",

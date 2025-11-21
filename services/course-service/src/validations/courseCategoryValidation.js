@@ -1,11 +1,13 @@
 import Joi from "joi";
 
 export const createCategorySchema = Joi.object({
-  name: Joi.string().min(2).max(50).required(),
+  category: Joi.string().min(2).max(50).required(),
   description: Joi.string().allow("").optional(),
+  subCategory: Joi.string().required()
 });
 
 export const updateCategorySchema = Joi.object({
-  name: Joi.string().min(2).max(50).optional(),
+  category: Joi.string().min(2).max(50).optional(),
   description: Joi.string().allow("").optional(),
+  subCategory: Joi.string().optional()
 });

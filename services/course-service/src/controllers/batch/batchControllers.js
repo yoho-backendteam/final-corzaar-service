@@ -373,3 +373,7 @@ export const getallbatch = async (req, res) => {
 
     }
 }
+
+export const getBatchByInstitute = async (req, res) => {
+   console.log("check")
+};
