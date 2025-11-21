@@ -1,127 +1,33 @@
-
-import AdminRegister from "../../models/Query/user_schema.js"
 import Query from "../../models/Query/query_schema.js"
 import { queryValidationSchema, queryReceiveSchema } from "../../validation/Query/query.js";
+import axios from "axios";
 
 const querysend = async (req, res) => {
-  const { senderid, query, senederrole } = req.body;
-  console.log("query", req.body);
-
-  const { error } = queryValidationSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({
-      Message: "Validation failed",
-      Errors: error.details.map((err) => err.message),
-    });
-  }
+  const { senderId, senderRole, query } = req.body;
 
   try {
-    if (!["User", "Admin", "Merchant"].includes(senederrole)) {
-      return res.status(400).json({ Message: "Welcome third party man" });
-    }
+    const newQuery = new Query({
+      senderId, 
+      senderRole,
+      queries: {
+        senderRole,
+        query,
+      },
+    });
 
-    if (senederrole === "User") {
-      const find_the_id = await AdminRegister.findById(senderid);
-      if (!find_the_id) {
-        return res.status(404).json({ Message: "User not found" });
-      }
+    await newQuery.save();
 
-      const admin = await AdminRegister.findOne({ role: "Admin" });
-      if (!admin) {
-        return res.status(404).json({ Message: "Admin not found" });
-      }
+    return res.status(200).json({
+      Message: "Query saved successfully",
+      data: newQuery,
+    });
 
-      const currentDate = new Date();
-
-      const newQuery = new Query({
-        senderId: find_the_id._id,
-        receiverId: admin._id,
-        senederrole: "User",
-        queries: {
-          senederrole: "User",
-          query: query,
-          date: currentDate,
-        },
-        status: "incompleted",
-      });
-
-      await newQuery.save();
-
-      return res.status(200).json({
-        Message: "Query sent successfully to admin",
-        data: { query: newQuery, user: find_the_id },
-      });
-    }
-
-    if (senederrole === "Admin") {
-      const find_the_id = await AdminRegister.findById(senderid);
-      if (!find_the_id) {
-        return res.status(404).json({ Message: "Admin not found" });
-      }
-
-      const currentDate = new Date();
-      const newQuery = new Query({
-        senderId: find_the_id._id,
-        receiverId: find_the_id._id,
-        senederrole: "Admin",
-        queries: {
-          senederrole: "Admin",
-          query,
-          date: currentDate,
-        },
-        status: "incompleted",
-      });
-
-      await newQuery.save();
-
-      return res.status(200).json({
-        Message: "Admin query saved successfully",
-        data: newQuery,
-      });
-    }
-
-    if (senederrole === "Merchant") {
-      const find_the_id = await AdminRegister.findById(senderid);
-      if (!find_the_id) {
-        return res.status(404).json({ Message: "Merchant not found" });
-      }
-
-      const admin = await AdminRegister.findOne({ role: "Admin" });
-      if (!admin) {
-        return res.status(404).json({ Message: "Admin not found" });
-      }
-
-      const currentDate = new Date();
-
-      const newQuery = new Query({
-        senderId: find_the_id._id,
-        receiverId: admin._id,
-        senederrole: "Merchant",
-        queries: {
-          senederrole: "Merchant",
-          query,
-          date: currentDate,
-        },
-        status: "incompleted",
-      });
-
-      await newQuery.save();
-
-      return res.status(200).json({
-        Message: "Merchant query sent successfully to admin",
-        data: { query: newQuery, 
-          // user: find_the_id 
-        },
-      });
-    }
   } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      Message: "Something went wrong: " + error.message,
+    return res.status(500).json({
+      Message: "Error: " + error.message,
     });
   }
 };
-
 
 // controllers/queryController.js
 export const queryreceive = async (req, res) => {
@@ -140,17 +46,7 @@ export const queryreceive = async (req, res) => {
   try {
     // Find queries by senderId and senderRole
     const queryDocs = await Query.find({
-      senderId,
-      senderRole
     })
-      .populate("senderId", "firstName lastName role email")
-      .populate("receiverId", "firstName lastName role email")
-      .sort({ createdAt: -1 });
-
-    if (!queryDocs || queryDocs.length === 0) {
-      return res.status(200).json({ Message: "No queries found for this sender" });
-    }
-
     return res.status(200).json({
       Message: "Queries fetched successfully",
       data: queryDocs,
@@ -165,27 +61,15 @@ export const queryreceive = async (req, res) => {
 };
 
 
-
-
 const adminqueryreply = async (req, res) => {
-  const { queryId, senderid, senederrole, response } = req.body;
+  const{queryId} = req.params
+  const {  response } = req.body;
 
   try {
-    if (!queryId || !senderid || !senederrole || !response) {
+    if (!response) {
       return res.status(400).json({
-        Message: "Missing required fields: queryId, senderid, senederrole, response",
+        Message: "Missing required fields: response",
       });
-    }
-
-    if (senederrole !== "Admin") {
-      return res.status(403).json({
-        Message: "Only Admins are allowed to send replies",
-      });
-    }
-
-    const admin = await AdminRegister.findById(senderid);
-    if (!admin) {
-      return res.status(404).json({ Message: "Admin not found" });
     }
 
     const queryDoc = await Query.findById(queryId);
@@ -213,6 +97,79 @@ const adminqueryreply = async (req, res) => {
   }
 };
 
+const adminReceiveQueries = async (req, res) => {
+  try {
+    // Fetch all queries
+    const queries = await Query.find()
+
+    const queriesWithInstitute = await Promise.all(
+      queries.map(async (q) => {
+        let instituteName = "N/A";
+
+        // safely get senderId from nested queries object if it exists
+        const senderId = q?.senderId;
+        if (senderId) {
+          try {
+            const courseResponse = await axios.get(`http://localhost:3002/api/getforcourse/${senderId}`);
+            instituteName = courseResponse.data?.data?.name || "N/A";
+          } catch (err) {
+            console.error(`Error fetching course ${senderId}:`, err.message);
+          }
+        }
+
+        return {
+          ...q._doc, // include all query fields
+          instituteName,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      Message: "Queries fetched successfully with institute names",
+      data: queriesWithInstitute,
+    });
+  } catch (error) {
+    console.error("Error fetching queries:", error.message);
+    return res.status(500).json({
+      Message: "Error fetching queries",
+      Error: error.message,
+    });
+  }
+};
+const markQueryResolved = async (req,res) => {
+  const { queryId } = req.params;
+
+  if (!queryId) {
+    return res.status(400).json({ Message: "Query ID is required" });
+  }
+
+  try {
+    const query = await Query.findById(queryId);
+    if (!query) {
+      return res.status(404).json({ Message: "Query not found" });
+    }
+
+    // Update status to Resolved
+    query.queries.status = "completed";
+
+    // Optionally, you can store admin response if needed
+    // query.queries.response = req.body.response || query.queries.response;
+
+    await query.save();
+
+    return res.status(200).json({
+      Message: "Query marked as resolved",
+      data: query,
+      Status: "Success",
+    });
+  } catch (error) {
+    console.error("Error resolving query:", error);
+    return res.status(500).json({
+      Message: "Error resolving query",
+      Error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
 
 
 
@@ -221,4 +178,9 @@ const adminqueryreply = async (req, res) => {
 
 
 
-export default { querysend, queryreceive,adminqueryreply } 
+
+
+
+
+
+export default { querysend, queryreceive,adminqueryreply,adminReceiveQueries,markQueryResolved } 

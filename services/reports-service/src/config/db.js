@@ -7,10 +7,10 @@ const uri = `mongodb+srv://db_user_2:ozBiZ0slw2U7kdOb@corzaar.qqlripp.mongodb.ne
 
 const connectDB = async () =>{
     try {
-        await mongoose.connect(url)
+        await mongoose.connect(uri)
         console.log("DB connected")
     } catch (error) {
-        console.log("Can't connect DB")
+        console.log("Can't connect DB",error)
         
     }
 
