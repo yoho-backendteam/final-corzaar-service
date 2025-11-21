@@ -14,7 +14,6 @@ router.use("/:id/content", courseContentRoutes);
 router.use("/:id/reviews", reviewRoutes);
 
 router.use("/course", batchRoute);
-router.use("/batches", batchRoute);
 
 router.use("/category", courseCategoryRoute)
 

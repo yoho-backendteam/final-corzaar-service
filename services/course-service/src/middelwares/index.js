@@ -3,7 +3,6 @@ export const PermissionVerify=(resource=[])=>(req,res,next)=>{
     try {
              
         const user = JSON.parse(req.headers["user"])
-        console.log(user)
         if (!user) {
             return res.status(500).json({ status: "failed", message: "Authentication credentials not provided" });
         }

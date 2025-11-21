@@ -7,7 +7,7 @@ import routes from "./src/routes/index.js";
 dotenv.config();
 
 const app = express();
-const PORT = 3014;
+const PORT = 3004;
 
 app.use(
   cors()

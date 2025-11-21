@@ -19,6 +19,6 @@ batchRoute.get("/:courseid/batch/:batchid/feature",getBatchSetting)
 batchRoute.get("/batch/search",getBatchBySearch)
 batchRoute.get("/batch/all",getallbatch)
 
-batchRoute.get("/merchant/batch", getBatchByInstitute);
+batchRoute.get("/batch/bymerchant/getall",PermissionVerify(["merchant"]), getBatchByInstitute);
 
 export default batchRoute
