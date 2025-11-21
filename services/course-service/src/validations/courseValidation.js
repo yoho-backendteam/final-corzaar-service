@@ -5,6 +5,7 @@ export const createCourseSchema = Joi.object({
   description: Joi.string().optional().allow(""),
   shortDescription: Joi.string().optional().allow(""),
   thumbnail: Joi.string().optional().allow(""),
+  branchId: Joi.required(),
   // previewVideo: Joi.string().optional().allow("").optional(),
   category: Joi.object({
     primary: Joi.string().optional().allow(""),
