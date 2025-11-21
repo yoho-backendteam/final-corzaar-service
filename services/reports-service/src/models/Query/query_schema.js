@@ -1,10 +1,11 @@
+
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 const querySchema = new mongoose.Schema(
   {
     senderId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Admin_Register",
       required: true,
     },

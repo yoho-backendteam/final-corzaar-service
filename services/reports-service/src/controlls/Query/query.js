@@ -46,8 +46,6 @@ export const queryreceive = async (req, res) => {
   try {
     // Find queries by senderId and senderRole
     const queryDocs = await Query.find({
-      senderId,
-      senderRole
     })
     return res.status(200).json({
       Message: "Queries fetched successfully",
