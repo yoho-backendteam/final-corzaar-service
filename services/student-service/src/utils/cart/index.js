@@ -42,5 +42,19 @@ export const GetCourseDataForCart=async(data)=>{
 }
 
 export const UpdateProfileFlagAxios=async(id)=>{
-  await axios.patch(`${process.env.course_url}/api/users/iscompleted/${id}`)
+  await axios.patch(`${process.env.auth_url}/api/users/iscompleted/${id}`)
+}
+
+export const GetPaymentById=async(id)=>{
+ const res = axios.get(`${process.env.payment_url}/api/student/${id}/get`,{
+    headers:{user:JSON.stringify({role:"open"})}
+  })
+  .then((response)=>{
+    return response?.data
+  })
+  .catch((err)=>{
+    console.error("payment fetching error:",err)
+  })
+
+  return res
 }

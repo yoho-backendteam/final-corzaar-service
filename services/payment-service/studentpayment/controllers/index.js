@@ -5,29 +5,58 @@ import mongoose from "mongoose"
 
 export const createPayment = async (req, res) => {
   try {
-    const data = req.body;
+    const user = req.user
+    const cartId = req.body.cartId
 
-    if (!data.studentId) {
-      return errorResponse(res, "Student ID is required");
-    }
+    // const data = req.body;
+    // if (!data.studentId) {
+    //   return errorResponse(res, "Student ID is required");
+    // }
 
-    // ✅ Fetch student details from correct API endpoint
-    const studentApiUrl = `http://localhost:${process.env.student_service_url}/student_management/getbyid/${data.studentId}`;
+    const studentApiUrl = `${process.env.student_url}/api/student_management/getbyuserid/${user?._id}`;
+    const cartApiUrl = `${process.env.student_url}/api/cart/getbyid/${cartId}`
     const studentResponse = await axios.get(studentApiUrl);
+    const cartResponse = await axios.get(cartApiUrl,{
+      headers:{user:JSON.stringify({role:"open"})}
+    })
     const student = studentResponse?.data?.data;
+    const cart = cartResponse?.data?.data
+    
     if (!student) {
       return errorResponse(res, "Student not found in student service");
     }
 
-    data.studentName = student.studentName || student.name || "Unknown Student";
+    if (!cart) {
+      return errorResponse(res, "cart not found in cart service");
+    }
 
+    const studentName = student?.personalInfo?.firstname + ' '+student?.personalInfo?.lastname
+
+    const data = {
+      studentName,
+      studentId:user?._id,
+      amount:cart?.pricing?.total,
+      type:"Fee",
+      paymentMethod:"UPI",
+      cartId,
+    }
 
     const payment = new PaymentTransaction(data);
     await payment.save();
 
-    return successResponse(res, "Payment transaction successful", payment);
-  } catch (error) {
+    const enrollresponse = await axios.post(`${process.env.student_url}/api/enrollment/create`,{
+          cartId,paymentId:payment?._id
+      },{
+        headers:{
+          user:JSON.stringify(user)
+        }
+      })
 
+    const enroll = enrollresponse?.data?.data
+
+    return successResponse(res, "Payment transaction and registration successfull ", enroll);
+  } catch (error) {
+    console.log(error)
     return errorResponse(res, error.message);
   }
 };
@@ -175,6 +204,16 @@ export const trackPayments = async (req, res) => {
 export const getallpayementfull = async (req, res) => {
   try {
     const payments = await PaymentTransaction.find({isdeleted: false });
+    return successResponse(res, "payment fetched successfully", payments);
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+}
+
+export const getByIdpayement = async (req, res) => {
+  try {
+    const {paymentId} = req.params
+    const payments = await PaymentTransaction.find({_id:paymentId,isdeleted: false });
     return successResponse(res, "payment fetched successfully", payments);
   } catch (error) {
     return errorResponse(res, error.message);
