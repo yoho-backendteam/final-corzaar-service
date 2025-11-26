@@ -3,15 +3,19 @@ import { queryValidationSchema, queryReceiveSchema } from "../../validation/Quer
 import axios from "axios";
 
 const querysend = async (req, res) => {
-  const { senderId, senderRole, query } = req.body;
-
   try {
+    const { senderId, senderRole, queries } = req.body;
+
     const newQuery = new Query({
-      senderId, 
+      senderId,
       senderRole,
+
       queries: {
-        senderRole,
-        query,
+        senderRole: queries?.senderRole || senderRole,
+        query: queries?.query,
+        response: queries?.response || "",
+        status: queries?.status || "incompleted",
+        date: queries?.date || new Date(),
       },
     });
 
