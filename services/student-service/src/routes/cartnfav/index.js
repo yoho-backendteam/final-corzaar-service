@@ -22,7 +22,7 @@ cartroute.post("/checkout/single", checkoutSingleCartItem);
 cartroute.post("/buy", checkoutDirectCourse);
 //fav
 cartroute.post('/fav/add',validateRequest(favSchema),addToFavorites)
-cartroute.get('/fav/get',validateRequest(favSchema),getFavorites)
+cartroute.get('/fav/get',getFavorites)
 cartroute.post("/fav/movetocart",moveToCart)
 cartroute.delete('/fav/remove-favourite/:courseId',removeFavoriteList)
 cartroute.delete('/fav/clear',clearFavorites)

@@ -4,7 +4,7 @@ import DashRoutes from "./dashboard/index.js"
 import { PermissionVerify } from "../middelwares/index.js"
 const mainRoute = express.Router()
 
-mainRoute.use("/",router)
+mainRoute.use("/activity",router)
 mainRoute.use("/admindashboard",PermissionVerify(["admin"]),DashRoutes)
 
 export default mainRoute

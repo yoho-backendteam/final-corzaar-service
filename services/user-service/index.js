@@ -4,10 +4,12 @@ import passport from "passport";
 import route from "./routes/index.js";
 import "./config/passport.config.js"
 import "./config/mongodb.config.js"
+import cors from 'cors'
 
 dotenv.config()
 
 const service = express()
+service.use(cors())
 service.use(express.json())
 
 service.use(passport.initialize())
