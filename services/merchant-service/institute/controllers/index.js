@@ -262,13 +262,11 @@ const course = async (url) => {
 export const getInstituteCourses = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // check if institute exists
     const institute = await Institute.findById(id);
     if (!institute) return errorResponse(res, "Institute not found", 404);
+    let courses = await course(`${process.env.course_service + process.env.coursebymerchat + institute._id}`);
+    if (!Array.isArray(courses)) courses = [];
 
-    // find all courses linked to this institute
-    const courses = await course(`${process.env.course_service + process.env.coursebymerchat + institute._id}`);
     return successResponse(res, "Courses fetched successfully", {
       institute: institute.name,
       totalCourses: courses.length,
@@ -278,6 +276,7 @@ export const getInstituteCourses = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+
 export const searchInstitutes = async (req, res) => {
   try {
     const { name, status, city, state, country } = req.query;
