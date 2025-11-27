@@ -36,7 +36,7 @@ const courseSchema = new mongoose.Schema(
     previewVideo: { type: String },
 
     instituteId: { type: String ,required:true},
-    branchId: { type: String },
+    branchId: {type : mongoose.Schema.ObjectId},
     students: {type: String},
     batches: {type: String},
     duration: {type: String},
