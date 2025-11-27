@@ -2,12 +2,12 @@ import express from "express";
 import dotenv from "@dotenvx/dotenvx";
 import './src/config/db.config.js'
 import routes from "./src/routes/index.js";
-import cors from "cors";
+// import cors from "cors";
 
 dotenv.config()
 
 const app = express()
-app.use(cors()) 
+// app.use(cors()) 
 
 const PORT = process.env.student_service_url || 3003
 
