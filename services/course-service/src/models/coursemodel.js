@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 const lessonSchema = new mongoose.Schema({
-  lessonId: { type: String, default: uuidv4, unique: true },
+  lessonId: { type: String, default: uuidv4 },
   title: { type: String, required: [true, "Lesson title is required"] },
   type: {
     type: String,

@@ -1,27 +1,30 @@
-export const PermissionVerify = (resource = []) => (req, res, next) => {
-  try {
-    const userHeader = req.headers["user"];
 
-    if (!userHeader) {
-      return res.status(400).json({ status: "failed", message: "User header is missing" });
-    }
-
-    let user;
+export const PermissionVerify=(resource=[])=>(req,res,next)=>{
     try {
-      user = JSON.parse(userHeader);
-    } catch (err) {
-      return res.status(400).json({ status: "failed", message: "Invalid user header JSON" });
-    }
+             
+        const user = JSON.parse(req.headers["user"])
+        if (!user) {
+            return res.status(500).json({ status: "failed", message: "Authentication credentials not provided" });
+        }
 
-    const userRole = user?.role;
-
-    if (resource.includes(userRole) || userRole === "open") {
-      req.userType = userRole;
-      req.user = user;
-      return next();
-    } else {
-      return res.status(401).json({ status: "not_permitted", message: "You are not allowed to access" });
-    }
+        const userRole = user?.role
+        if (userRole === "student" && resource.includes(userRole)) {
+            req.userType = userRole
+            req.user = user
+            next()
+        }else if(userRole === "merchant" && resource.includes(userRole)) {
+            req.userType = userRole
+            req.user = user
+            next()
+        }else if(userRole === "admin" && resource.includes(userRole)) {
+            req.userType = userRole
+            req.user = user
+            next()
+        }else if (userRole === "open" && resource.includes(userRole)) {
+            next()
+        }else {  
+            return res.status(401).json({ message: "your not allow to access", status: "not_permitted" });
+        }
 
   } catch (error) {
     console.error("Permission middleware error:", error);

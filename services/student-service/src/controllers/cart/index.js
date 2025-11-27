@@ -135,6 +135,24 @@ export const getCart = async (req, res) => {
   }
 };
 
+export const getCartById = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const cart = await CartCourses.findOne({_id:id});
+
+    if (!cart) return errorResponse(res, "No active cart found for this user");
+
+    // const {data} = await GetCourseDataForCart({item:cart?.items})
+
+    // const output = {...cart._doc,items:data}
+
+    return successResponse(res, "Cart retrieved successfully", cart);
+  } catch (err) {
+    return errorResponse(res, err.message || "Server error");
+  }
+};
+
 export const removeItem = async (req, res) => {
   try {
     const { userId } = req.body; // comes from validator

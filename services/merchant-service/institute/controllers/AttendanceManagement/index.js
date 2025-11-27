@@ -279,7 +279,7 @@ export const GetAllStudentFullAttendance = async (req, res) => {
             allAttendance = await Attendance.find({}).populate("dateId");
         }
         if (!allAttendance.length) {
-            return res.status(404).json({ message: "No attendance records found" });
+            return res.status(401).json({ message: "No attendance records found" });
         }
         const allStudentsData = await safeFetch(process.env.API_STUDENT, "Student API");
 

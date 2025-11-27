@@ -1,24 +1,30 @@
 import { Batch } from "../../models/batch/batchSchema.js"
 import { Course } from "../../models/coursemodel.js";
+import { GetInstituteByUserId } from "../../utils/axiosHelpers.js";
 import { createBatchValidation, updateBatchContentValidation, updateBatchSettingsValidation, updateBatchValidation } from "../../validations/batchValidation.js";
 
 // create batch
 export const createBatch = async (req, res) => {
+    const user = req.user
     const { courseid } = req.params
     console.log(courseid, "coruse");
 
     try {
         const { error, value } = createBatchValidation.validate(req.body);
+
+        
         if (error) {
             return res.status(400).json({
                 status: false,
                 message: error.details[0].message
             });
         }
+        
+        const { data } = await GetInstituteByUserId(user?._id)
 
         const checkId = await Course.findById(courseid)
         if (!checkId) return res.status(400).json({ message: "course not found" })
-        const create = new Batch(value);
+        const create = new Batch({...value,merchantId:data?._id});
         await create.save()
         res.status(201).json({
             status: true,
@@ -373,3 +379,24 @@ export const getallbatch = async (req, res) => {
 
     }
 }
+
+export const getBatchByInstitute = async (req, res) => {
+  try {
+     const user = req.user 
+     const { data } = await GetInstituteByUserId(user?._id)
+
+     const batches = await Batch.find({merchantId:data?._id,isdeleted:false})
+
+     res.status(200).json({
+            status: true,
+            message: "get all batch successfully",
+            data: batches
+    })
+  } catch (error) {
+     res.status(500).json({
+            status: false,
+            message: "Internal server error",
+            error: error.message
+        })
+  }
+};

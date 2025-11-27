@@ -25,7 +25,7 @@ export const createPayment = async (req, res) => {
       });
     }
 
-    const data = await getData("http://localhost:3000/api/getall")
+    const data = await getData("http://localhost:3002/api/getall")
 
     const verifyId = data.data.some((merchant) => merchant._id === value.instituteId);
 
@@ -57,25 +57,20 @@ export const getInstitutePaymentRequests = async (req, res) => {
   }
 };
 
-
-export const getAllInstitutePaymentRequests = async (req, res) => {
+// get all payment
+export const getAllInstitutePaymentRequests = async(req,res) => {
   try {
-    const payments = await InstitutePayment.find({ isdeleted: false })
-      .populate("instituteId", "name branchCode contactInfo email phone location");
-
-    res.status(200).json({
-      status: true,
-      message: "Successfully fetched all institute payments",
-      data: payments,
-    });
+    const getAll = await InstitutePayment.find({isdeleted : false})
+    res.status(200).json({status: true, 
+    message: "successfully fetched all datas",
+    data: getAll })
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: "Server error while fetching payments",
-      error: error.message,
-    });
+      Error:error
+    })
   }
-};
+}
 
 // update Institute Payment
 export const updateInstitutePayment = async (req, res) => {
@@ -131,6 +126,6 @@ export const getInstitutePaymentByYear = async(req,res) => {
     const getData = await InstitutePayment.find({year}).sort({createdAt:-1})
     res.status(200).json({status:true,message:"successfull fetched monthly wise data", data:getData})
   } catch (error) {
-   res.status(500).json({ message: error.message });
-   }
+   res.status(500).json({ message: error.message });
+   }
 }

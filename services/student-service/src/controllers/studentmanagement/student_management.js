@@ -110,6 +110,34 @@ export const getStudentById = async (req, res) => {
   }
 };
 
+export const getStudentByUserId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await student_management.findOne({userId:id});
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: student
+    });
+
+  } catch (error) {
+    console.error('Error retrieving student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving student.',
+      error: error.message
+    });
+  }
+};
+
 
 
 export const updateStudentById = async (req, res) => {

@@ -1,6 +1,7 @@
 import { JWTDecoded } from "../utils/AuthHelpers.js";
 import { MerchantModel } from "../models/merchantModel.js";
 import { UserModel } from "../models/usermodel.js";
+import { AdminModel } from "../models/adminModel.js";
 
 
 export const AuthVerify=( resource = [])=>async(req,res,next)=>{
@@ -48,6 +49,19 @@ export const AuthVerify=( resource = [])=>async(req,res,next)=>{
                     next()
                 }else if (decoded.role === "merchant" && resource.includes(decoded.role)) {
                     const user = await MerchantModel.findOne({_id:decoded._id}).select("-password")
+                    if (!user) {
+                        return res.status(401).json({
+                            success:false,
+                            status: "failed",
+                            message: "User not found.",
+                            details: "The requested user does not exist in the system."
+                        });
+                    }
+        
+                    req.user = user
+                    next()
+                }else if (decoded.role === "admin" && resource.includes(decoded.role)) {
+                    const user = await AdminModel.findOne({_id:decoded._id}).select("-password")
                     if (!user) {
                         return res.status(401).json({
                             success:false,
