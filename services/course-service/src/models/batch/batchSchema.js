@@ -4,7 +4,6 @@ import {v4 as uuidv4} from "uuid";
 const batchSchema = new mongoose.Schema({
   merchantId: {
     type : mongoose.Schema.ObjectId,
-    ref: 'Institute'
     },
   batchId: {
     type: String,
@@ -20,7 +19,6 @@ const batchSchema = new mongoose.Schema({
   },
   courseId: {
     type : mongoose.Schema.ObjectId,
-    ref: 'Course'
   },
   batchName: {
     type: String,

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import student_management from '../../models/studentmanagment/student_management.js';
 import { studentJoiSchema, studentUpdateJoiSchema } from '../../validations/studentmanagement/student_management.js';
+import { UpdateProfileFlagAxios } from '../../utils/cart/index.js';
 
 
 
@@ -22,16 +23,19 @@ export const createStudent = async (req, res) => {
     const newStudent = new student_management({
       _id: new mongoose.Types.ObjectId(),
       userId:user?._id,
-      ...value
+      ...value,
+      fullName:value?.personalInfo?.fullName
     });
 
   
     const savedStudent = await newStudent.save();
 
+    UpdateProfileFlagAxios(user?._id)
+
     res.status(201).json({
       success: true,
       message: 'Student created successfully!',
-      data: savedStudent
+      // data: savedStudent
     });
 
   } catch (error) {
@@ -83,6 +87,34 @@ export const getStudentById = async (req, res) => {
     const { id } = req.params;
 
     const student = await student_management.findById(id);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: student
+    });
+
+  } catch (error) {
+    console.error('Error retrieving student:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving student.',
+      error: error.message
+    });
+  }
+};
+
+export const getStudentByUserId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await student_management.findOne({userId:id});
 
     if (!student) {
       return res.status(404).json({

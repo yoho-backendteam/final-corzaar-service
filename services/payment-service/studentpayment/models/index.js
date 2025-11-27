@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const paymentTransactionSchema = new mongoose.Schema(
     {
-
         transactionId: {
             type: String,
             required: true,
@@ -11,20 +10,13 @@ const paymentTransactionSchema = new mongoose.Schema(
             default: () => "TXN-" + Date.now(), // this runs before validation
             match: [/^TXN-\d+$/, "Transaction ID must start with 'TXN-' followed by numbers"],
         },
-
-        instituteId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Institute",
-            required: true,
-        },
         studentId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Student",
             required: true,
         },
-        studentName:{
-            type:String,
-            required:true,
+        cartId:{
+            type:mongoose.Types.ObjectId,
         },
         amount: {
             type: Number,
@@ -51,55 +43,6 @@ const paymentTransactionSchema = new mongoose.Schema(
         },
         course:{
             type: String,
-        },
-        merchantname:{
-            type:String,
-        },
-        payouts:{
-            payoutId:{
-                type:String,
-            },
-            merchant:{
-                type:String,
-            },
-            totalEarings:{
-                type:Number,
-            },
-            platformfee:{
-                type:Number,
-            },
-            reqDate:{
-                type:Date,
-            },
-            status:{    
-                type:String,
-            enum: ["Pending", "Processed", "Rejected","released"],
-            },
-            pendingbalance:{
-                type:Number,
-            },
-            payoutbalance:{ 
-                type:Number,
-            }
-        },
-
-        allTransaticon:{
-       description:{
-            type: String,
-       },
-         date:{     
-            type: Date,
-         },
-         amount:{       
-            type: Number,
-         },
-         status:{       
-            type: String,
-             enum: ["Pending", "Completed", "Failed"],
-         },
-         commision:{
-            type: Number,
-         }
         },
         remarks: {
             type: String,

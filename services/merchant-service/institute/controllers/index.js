@@ -5,6 +5,7 @@ import { errorResponse, generateUUID, successResponse, validateCoordinates } fro
 import dotenv from "dotenv"
 dotenv.config()
 import Branch from "../models/branchSchema.js";
+import { ProfileUpdate } from "../utils/apiHelper.js";
 
 
 export const createInstitute = async (req, res) => {
@@ -19,7 +20,7 @@ export const createInstitute = async (req, res) => {
     }
 
 
-    const institute = new Institute({ uuid, ...data,userId:user?._id ,contactInfo:{...data?.contactInfo,phone:user?.phoneNumber}});
+    const institute = new Institute({ uuid, ...data, userId: user?._id, contactInfo: { ...data?.contactInfo, phone: user?.phoneNumber } });
     await institute.save();
 
     const mainBranch = new Branch({
@@ -42,6 +43,8 @@ export const createInstitute = async (req, res) => {
 
     await mainBranch.save();
 
+    await ProfileUpdate(user?._id)
+
     return successResponse(res, "Institute and main branch created successfully", {
       institute,
       mainBranch,
@@ -55,8 +58,7 @@ export const createInstitute = async (req, res) => {
 
 export const getNearbyInstitutes = async (req, res) => {
   try {
-    const { latitude, longitude, maxDistance = 5000 } = req.body;
-
+    const { latitude, longitude, maxDistance } = req.query;
     if (!latitude || !longitude) {
       return res.status(400).json({
         success: false,
@@ -67,13 +69,30 @@ export const getNearbyInstitutes = async (req, res) => {
     const lat = parseFloat(latitude);
     const lon = parseFloat(longitude);
 
+    if (isNaN(lat) || isNaN(lon)) {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude and longitude must be valid numbers.",
+      });
+    }
+    const distanceInMeters = maxDistance
+      ? parseFloat(maxDistance)
+      : 5000;
+
+    if (isNaN(distanceInMeters)) {
+      return res.status(400).json({
+        success: false,
+        message: "maxDistance must be a valid number.",
+      });
+    }
+
     const institutes = await Institute.aggregate([
       {
         $geoNear: {
           near: { type: "Point", coordinates: [lon, lat] },
           distanceField: "distance",
           spherical: true,
-          maxDistance: parseFloat(maxDistance),
+          maxDistance: distanceInMeters, 
           query: { isdeleted: false, isActive: true },
         },
       },
@@ -98,7 +117,7 @@ export const getNearbyInstitutes = async (req, res) => {
       data: institutes,
     });
   } catch (error) {
-    console.error("❌ Error fetching nearby institutes:", error);
+    console.error("Error fetching nearby institutes:", error);
     res.status(500).json({
       success: false,
       message: "Server error fetching nearby institutes.",
@@ -119,7 +138,7 @@ export const updateInstitute = async (req, res) => {
       updates,
       { new: true, runValidators: true }
     );
-   
+
 
     if (!institute) return errorResponse(res, "Institute not found", 404);
     return successResponse(res, "Institute updated successfully", institute);
@@ -130,8 +149,8 @@ export const updateInstitute = async (req, res) => {
 
 export const getInstitutes = async (req, res) => {
   try {
-    const institutes = await Institute.find({isdeleted:false});
-    
+    const institutes = await Institute.find({ isdeleted: false });
+
     return successResponse(res, "Institutes fetched successfully", institutes);
   } catch (error) {
     return errorResponse(res, error.message);
@@ -140,9 +159,20 @@ export const getInstitutes = async (req, res) => {
 
 export const getInstitutesByUserId = async (req, res) => {
   try {
-    const {id} = req.params
-    const institutes = await Institute.findOne({userId:id}).select("uuid _id name logo")
-    
+    const { id } = req.params
+    const institutes = await Institute.findOne({ userId: id }).select("uuid _id name logo")
+
+    return successResponse(res, "Institutes fetched successfully", institutes);
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+export const getInstituteForCourse = async (req, res) => {
+  try {
+    const { id } = req.params
+    const institutes = await Institute.findOne({ _id: id }).select("uuid _id name logo")
+
     return successResponse(res, "Institutes fetched successfully", institutes);
   } catch (error) {
     return errorResponse(res, error.message);
@@ -154,40 +184,40 @@ export const getByIdInstitutes = async (req, res) => {
   try {
     const { id } = req.params
     const institutes = await Institute.findById(id);
-     if (!institutes) {
-            return res.status(404).json({ message: "institute not found"})
-        }
+    if (!institutes) {
+      return res.status(404).json({ message: "institute not found" })
+    }
     return successResponse(res, "Institute fetched successfully", institutes);
   } catch (error) {
     return errorResponse(res, error.message);
   }
 };
 export const deleteinstitutebyid = async (req, res) => {
-    try {
-        const { id } = req.params
-          if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+  try {
+    const { id } = req.params
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: "Invalid Institute ID format" });
     }
-        const deletedinstitute = await Institute.findByIdAndDelete(id)
-        if (!deletedinstitute) {
-            return res.status(404).json({ message: "Institute profile not found"})
-        }
-
-        res.status(200).json({ message: "deleted Institute", deletedinstitute })
-
-    } catch (error) {
-        res.status(500).json({ message: "error" })
+    const deletedinstitute = await Institute.findByIdAndDelete(id)
+    if (!deletedinstitute) {
+      return res.status(404).json({ message: "Institute profile not found" })
     }
+
+    res.status(200).json({ message: "deleted Institute", deletedinstitute })
+
+  } catch (error) {
+    res.status(500).json({ message: "error" })
+  }
 }
 
-const student = async(url) => {
-    try {
-        const response = await axios.get(url)
-        return response.data;
-        
-    } catch (error) {
-        
-    }
+const student = async (url) => {
+  try {
+    const response = await axios.get(url)
+    return response.data;
+
+  } catch (error) {
+
+  }
 }
 const fetchStudents = async (url) => {
   try {
@@ -221,24 +251,22 @@ export const getInstitutesStudents = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
-const course = async(url) => {
-    try {
-        const response = await axios.get(url)
-        return response;       
-    } catch (error) {
-       
-    }
+const course = async (url) => {
+  try {
+    const response = await axios.get(url)
+    return response;
+  } catch (error) {
+
+  }
 }
 export const getInstituteCourses = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // check if institute exists
     const institute = await Institute.findById(id);
     if (!institute) return errorResponse(res, "Institute not found", 404);
+    let courses = await course(`${process.env.course_service + process.env.coursebymerchat + institute._id}`);
+    if (!Array.isArray(courses)) courses = [];
 
-    // find all courses linked to this institute
-    const courses = await course(`${process.env.course_service + process.env.coursebymerchat + institute._id}`);
     return successResponse(res, "Courses fetched successfully", {
       institute: institute.name,
       totalCourses: courses.length,
@@ -248,6 +276,7 @@ export const getInstituteCourses = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+
 export const searchInstitutes = async (req, res) => {
   try {
     const { name, status, city, state, country } = req.query;

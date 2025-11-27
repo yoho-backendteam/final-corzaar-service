@@ -1,4 +1,5 @@
-// CREATE
+import { Category } from "../../models/category/coursecategorymodel.js";
+import { createCategorySchema, updateCategorySchema } from "../../validations/courseCategoryValidation.js";
 export const createCategory = async (req, res) => {
   const { error, value } = createCategorySchema.validate(req.body, {
     abortEarly: false,

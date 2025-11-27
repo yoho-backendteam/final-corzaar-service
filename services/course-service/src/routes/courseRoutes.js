@@ -11,17 +11,21 @@ import {
   getTrendingCourses,
   getallcorses,
   getCourseByInstitute,
-  getCourseByBranch
+  getCourseByBranch,
+  filterCourses,
+  GetCartCourseData
 } from "../controllers/courseController.js";
 import contentRoutes from "../routes/coursecontent/routes.js"; 
 import reviewRoutes from "../routes/coursereview/routes.js";
 import { authorize } from "../middelwares/authorizationClient.js";
 import { PermissionVerify } from "../middelwares/index.js";
+import route from "../../../merchant-service/institute/routes/routes.js";
 
 
 
 const router = express.Router();
 
+router.get("/filter", PermissionVerify(["open","merchant","admin"]), filterCourses);
 router.get("/search",PermissionVerify(["open","merchant","admin"]), searchCourses);
 router.get("/categories",PermissionVerify(["open","merchant","admin"]), getCategories);
 router.get("/featured",PermissionVerify(["open","merchant","admin"]), getFeaturedCourses);
@@ -39,6 +43,8 @@ router.put("/:id",
 router.delete("/:id",
   PermissionVerify(["merchant"]),
    deleteCourse);
+
+router.post("/courseincart",PermissionVerify(["open"]),GetCartCourseData)
 
 router.use("/:id/content", contentRoutes);
 router.use("/:id/reviews", reviewRoutes);

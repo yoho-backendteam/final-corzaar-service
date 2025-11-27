@@ -3,9 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const safeFetch = async (url, label) => {
+const safeFetch = async (req,url, label) => {
   try {
-    const res = await axios.get(url);
+    const res = await axios.get(url,{
+      headers:{
+        user:JSON.stringify(req.user)
+      }
+    });
     return res?.data?.data || res.data || [];
   } catch (err) {
     console.error(`${label} `, {
@@ -21,8 +25,6 @@ const safeFetch = async (url, label) => {
 
 export const getAdminDashboardData = async (req, res) => {
   try {
-    console.log("Fetching dashboard data...");
-
     const [
       merchants,
       Spayments,
@@ -33,14 +35,14 @@ export const getAdminDashboardData = async (req, res) => {
       Ipayments,
       activities,
     ] = await Promise.all([
-      safeFetch(process.env.MERCHANT_API, "Merchant API"),
-      safeFetch(process.env.PAYMENT_API, "SPayment API"),
-      safeFetch(process.env.COURSE_API, "Course API"),
-      safeFetch(process.env.STUDENT_API, "Student API"),
-      safeFetch(process.env.NOTIFICATION_API, "Notification API"),
-      safeFetch(process.env.PLACEMENT_API, "Placement API"),
-      safeFetch(process.env.PAYMENTI_API, "IPayment API"),
-      safeFetch(process.env.ACTIVITY_API.replace(":role", "Admin"), "Activity API"),
+      safeFetch(req,`${process.env.merchant_url}${process.env.MERCHANT_API}`, "Merchant API"),
+      safeFetch(req,`${process.env.payment_url}${process.env.PAYMENT_API}`, "SPayment API"),
+      safeFetch(req,`${process.env.course_url}${process.env.COURSE_API}`, "Course API"),
+      safeFetch(req,`${process.env.student_url}${process.env.STUDENT_API}`, "Student API"),
+      safeFetch(req,`${process.env.notification_url}${process.env.NOTIFICATION_API}`, "Notification API"),
+      safeFetch(req,`${process.env.merchant_url}${process.env.PLACEMENT_API}`, "Placement API"),
+      safeFetch(req,`${process.env.payment_url}${process.env.PAYMENTI_API}`, "IPayment API"),
+      safeFetch(req,`${process.env.activity_url}${process.env.ACTIVITY_API}`.replace(":role", "Admin"), "Activity API"),
     ]);
     const studentRevenue = Spayments
       ?.filter((p) => p.status?.toLowerCase() === "completed")

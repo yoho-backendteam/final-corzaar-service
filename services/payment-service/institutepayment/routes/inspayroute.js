@@ -3,7 +3,7 @@ import { createPayment, deleteInstitutePayment, getAllInstitutePaymentRequests, 
 
 const inspayRoutes = express.Router();
 
-inspayRoutes.post("/",createPayment)
+inspayRoutes.post("/create",createPayment)
 inspayRoutes.get("/getall",getAllInstitutePaymentRequests)
 inspayRoutes.get("/month/year",getInstitutePaymentByMonthwithYear)
 inspayRoutes.get("/year",getInstitutePaymentByYear)

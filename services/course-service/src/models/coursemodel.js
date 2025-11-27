@@ -3,9 +3,13 @@ import { v4 as uuidv4 } from "uuid";
 
 const lessonSchema = new mongoose.Schema({
   lessonId: { type: String, default: uuidv4 },
-  title: { type: String, required: true },
-  type: { type: String, enum: ["video", "text", "quiz", "assignment"], default: "video" },
-  duration: Number,
+  title: { type: String, required: [true, "Lesson title is required"] },
+  type: {
+    type: String,
+    enum: ["video", "text", "quiz", "assignment"],
+    default: "video"
+  },
+  duration: { type: Number, min: 0 },
   content: {
     videoUrl: String,
     textContent: String,
@@ -35,8 +39,15 @@ const courseSchema = new mongoose.Schema(
     thumbnail: { type: String },
     previewVideo: { type: String },
 
-    instituteId: { type: String ,required:true},
-    branchId: {type : mongoose.Schema.ObjectId},
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+
     students: {type: String},
     batches: {type: String},
     duration: {type: String},
@@ -93,11 +104,6 @@ const courseSchema = new mongoose.Schema(
       },
     ],
 
-    uuid: {
-      type: String,
-      unique: true,
-      default: uuidv4
-    },
     is_active: {
       type: Boolean,
       default: true
@@ -107,4 +113,4 @@ const courseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Course = mongoose.models.Course || mongoose.model("Course", courseSchema);
+export const Course = mongoose.model("Course", courseSchema);

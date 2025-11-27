@@ -15,6 +15,10 @@ const studentSchema = new mongoose.Schema({
   studentId:{
     type:String
   },
+  fullName:{
+    type:String,
+    required:true
+  },
 
   status: {
     type: String,
@@ -28,7 +32,7 @@ const studentSchema = new mongoose.Schema({
     lastName:{type:String},
     phoneNumber:{type:Number},
     email:{type:String},
-    dateOfBirth: { type: Date },
+    dateOfBirth: { type: String },
     gender: { type: String },
     bloodGroup: { type: String },
     nationality: { type: String },
@@ -39,21 +43,21 @@ const studentSchema = new mongoose.Schema({
         street: { type: String },
         city: { type: String },
         state: { type: String },
-        zipCode: { type: Number },
+        zipCode: { type: String },
         country: { type: String }
       },
       current: {
         street: { type: String },
         city: { type: String },
         state: { type: String },
-        zipCode: { type: Number },
+        zipCode: { type: String },
         country: { type: String }
       }
     },
     emergencyContact: {
       name: { type: String },
       relationship: { type: String },
-      phone: { type: Number},
+      phone: { type: String},
       email: { type: String }
     }
   },

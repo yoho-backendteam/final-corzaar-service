@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false,
     },
+    is_completed:{
+        type:Boolean,
+        default:false
+    },
     isActive:{
         type:Boolean,
         default:true,

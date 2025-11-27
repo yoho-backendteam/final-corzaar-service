@@ -7,7 +7,11 @@ export const studentJoiSchema = Joi.object({
   status: Joi.string().valid('active', 'inactive', 'graduated', 'dropped', 'suspended'),
 
   personalInfo: Joi.object({
-    dateOfBirth: Joi.date().required(),
+    firstName:Joi.string(),
+    lastName:Joi.string(),
+    email:Joi.string().email(),
+    fullName:Joi.string(),
+    dateOfBirth: Joi.string().required(),
     gender: Joi.string().valid('male', 'female', 'other').required(),
     bloodGroup: Joi.string(),
     nationality: Joi.string(),
@@ -18,14 +22,14 @@ export const studentJoiSchema = Joi.object({
         street: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string().required(),
-        zipCode: Joi.number().required(),
+        zipCode: Joi.string().required(),
         country: Joi.string().required()
       }).required(),
       current: Joi.object({
         street: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string().required(),
-        zipCode: Joi.number().required(),
+        zipCode: Joi.string().required(),
         country: Joi.string().required()
       }).required()
     }).required(),

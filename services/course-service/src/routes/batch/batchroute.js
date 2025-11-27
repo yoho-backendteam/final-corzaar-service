@@ -1,5 +1,5 @@
 import express from 'express'
-import { createBatch, deleteBatchByBatchId, getAllBatch, getBatchByBatchId, getBatchByCourse, getBatchBySearch, getBatchSetting, getContentByBatchId, updateBatchByBatchId, updateBatchSetting, updateContentByBatchId,getBatchByStudent,getallbatch } from '../../controllers/batch/batchControllers.js';
+import { createBatch, deleteBatchByBatchId, getAllBatch, getBatchByBatchId, getBatchByCourse, getBatchBySearch, getBatchSetting, getContentByBatchId, updateBatchByBatchId, updateBatchSetting, updateContentByBatchId,getBatchByStudent,getallbatch, getBatchByInstitute } from '../../controllers/batch/batchControllers.js';
 import { PermissionVerify } from '../../middelwares/index.js';
 
 
@@ -18,5 +18,7 @@ batchRoute.put("/:courseid/batch/:batchid/feature",PermissionVerify(["merchant"]
 batchRoute.get("/:courseid/batch/:batchid/feature",getBatchSetting)
 batchRoute.get("/batch/search",getBatchBySearch)
 batchRoute.get("/batch/all",getallbatch)
+
+batchRoute.get("/batch/bymerchant/getall",PermissionVerify(["merchant"]), getBatchByInstitute);
 
 export default batchRoute

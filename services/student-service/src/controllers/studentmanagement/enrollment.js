@@ -1,4 +1,7 @@
+import CartCourses from "../../models/cart/index.js";
 import Enrollment from "../../models/studentmanagment/Enrollment.js";
+import student_management from "../../models/studentmanagment/student_management.js";
+import { GetCourseDataForCart, GetPaymentById } from "../../utils/cart/index.js";
 import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
 import mongoose from "mongoose";
 
@@ -6,23 +9,67 @@ import mongoose from "mongoose";
 
 export const createOrderController = async (req, res) => {
   try {
+    const user = req.user
+    const cartId = req.body.cartId
+    const paymentId = req.body.paymentId
 
-    const { error, value } = createOrderValidation.validate(req.body, {
-      abortEarly: false,
-    });
+    // const { error, value } = createOrderValidation.validate(req.body, {
+    //   abortEarly: false,
+    // });
 
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: error.details.map((err) => err.message),
-      });
+    // if (error) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Validation failed",
+    //     errors: error.details.map((err) => err.message),
+    //   });
+    // }
+
+    const cart = await CartCourses.findOne({_id:cartId})
+    // const payment = await GetPaymentById(paymentId)
+    const student = await student_management.findOne({userId:user?._id})
+
+    const {data} = await GetCourseDataForCart({item:cart?.items})
+    
+    const output = {...cart._doc,items:data}
+
+    const items =[]
+
+    output.items.forEach((data)=>{
+        const item = {
+          courseId:data?._id,
+          title:data?.title,
+          price:data?.pricing?.price,
+          instituteId:data?.instituteId?._id
+        }
+
+        items.push(item)
+    })
+
+    const enroll = {
+      userId:user?._id,
+      items:items,
+      pricing: {
+        subtotal: output?.pricing?.subtotal,
+        discount: output?.coupon?.discountAmount,
+        tax: output?.pricing?.tax,
+        total: output?.pricing?.total,
+        currency:output?.pricing?.currency
+      },
+      payment: paymentId,
+      billing: {
+        firstName: student?.personalInfo?.firstName,
+        lastName: student?.personalInfo?.lastName,
+        email:student?.personalInfo?.email,
+        phone: student?.personalInfo?.phoneNumber,
+        address: student?.personalInfo?.address,
+      },
     }
 
-
-    const newOrder = new Enrollment(value);
+    const newOrder = new Enrollment(enroll);
     const savedOrder = await newOrder.save();
 
+    await CartCourses.findOneAndUpdate({_id:cartId},{checkout:true})
     return res.status(201).json({
       success: true,
       message: "Order created successfully",
@@ -68,7 +115,8 @@ export const getAllOrdersController = async (req, res) => {
     const orders = await Enrollment.find(query)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate("userId");
 
     const totalOrders = await Enrollment.countDocuments(query);
 
@@ -145,3 +193,38 @@ export const getOrderById = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+export const updateEnrollment = async(req,res)=>{
+  try {
+
+    const {id} = req.params
+    const {status} = req.body
+
+    const enrollment = await Enrollment.findByIdAndUpdate({_id:id}, {status}, {new: true})
+    if(!enrollment)  return res.status(404).json({
+      success: false,
+      message: "Enrollment not found.",
+      
+    })
+
+    res.status(200).json({
+      success: true,
+      message: "Enrollment updated successfully",
+      data: enrollment
+    })
+    
+  } catch (error) {
+    console.error("Error retrieving order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while retrieving order.",
+      error: error.message
+    });
+  }
+}

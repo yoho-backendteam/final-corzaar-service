@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { GetUserProfile, GetUserProfileById, UsersMobileRegister, UsersRootLogin } from "../../controllers/users/index.js";
+import { GetUserProfile, GetUserProfileById, UpdateProfileComplted, UsersMobileRegister, UsersRootLogin } from "../../controllers/users/index.js";
 import { verifyOtp } from "../../controllers/shared/index.js";
 import { AuthVerify } from "../../middelware/AuthVerify.js";
 
@@ -25,6 +25,8 @@ userRoute.post('/verify-otp',verifyOtp)
 userRoute.get('/profile',AuthVerify(["noob","student"]),GetUserProfile)
 
 userRoute.get('/profile-gate/:id',GetUserProfileById)
+
+userRoute.patch("/iscompleted/:id",UpdateProfileComplted)
 
 
 

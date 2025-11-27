@@ -1,13 +1,17 @@
 import express from "express"
-import { createPayment, deletepaymentbyid, getallpayementfull, getAllPayments, getByIDPayment, trackPayments,updatePayment } from "../controllers/index.js"
+import { createPayment, deletepaymentbyid, getallpayementfull, getAllPayments, getByIdpayement, getByIDPayment, trackPayments,updatePayment } from "../controllers/index.js"
 import { createPaymentValidation } from "../../validation/index.js"
 import { validate } from "../middleware/validate.js"
 import { generateFinancialReport } from "../controllers/report.js"
 import { authorize } from "../middleware/authorizationClient.js"
 import inspayRoutes from "../../institutepayment/routes/inspayroute.js"
+import { PermissionVerify } from "../middleware/index.js"
 
 export const route = express.Router()
-route.post("/student/:id",validate(createPaymentValidation), createPayment)
+route.post("/student/create",
+    // ,validate(createPaymentValidation)
+    PermissionVerify(["student","noob"])
+    , createPayment)
 route.get('/student/getall/:id',getAllPayments)
 route.put('/student/:id',
     authorize(["admin","merchant"]),
@@ -19,8 +23,8 @@ route.delete("/student/:id",
 route.get('/student/search',trackPayments)
 route.get('/student/report',generateFinancialReport)
 route.get('/student/all/payments',getallpayementfull)
+route.get("/student/:paymentId/get",getByIdpayement)
 
-route.use("/inspay",inspayRoutes)
 
 
 export default route

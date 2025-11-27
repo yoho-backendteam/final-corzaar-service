@@ -14,13 +14,19 @@ const getData = async(url) => {
 
 export const checkoutAllCart = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const user = req.user;
+    const {cartId} = req.params;
+    
+    const cart = await CartCourses.findOne({_id:cartId,userId:user?._id, checkout:false});
 
-    if (!userId) return res.status(400).json({ message: "User ID required" });
+    if (!cart) return errorResponse(res, "No active cart found for this user");
+    
+    const {data} = await GetCourseDataForCart({item:cart?.items})
+    
+    const output = {...cart._doc,items:data}
+    
 
-    const carts = await CartCourses.find({ userId, isactive: true, isdeleted: false });
-
-    if (!carts || carts.length === 0) {
+    if (!cart) {
       return res.status(400).json({ message: "No active items in cart" });
     }
 

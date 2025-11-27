@@ -10,11 +10,15 @@ const EnrollmentSchema = new mongoose.Schema({
      default: uuidv4 
     },
 
+  instituteId:{
+    type:mongoose.Types.ObjectId,
+  },
+
 
   userId: {
       type: mongoose.Schema.Types.ObjectId,
              ref: "Student"
-            },
+    },
 
   items: [{
     courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
@@ -38,19 +42,23 @@ const EnrollmentSchema = new mongoose.Schema({
     discountType: { type: String, enum: ['percentage', 'fixed'] }
   },
 
-  payment: {
-    method: { type: String },
-    status: { 
-      type: String, 
-      enum: ['pending', 'completed', 'failed', 'refunded'], 
-      default: 'pending' 
-    },
-    transactionId: { type: String },
-    paymentIntentId: { type: String },
-    paidAt: { type: Date },
-    refundedAt: { type: Date },
-    refundAmount: { type: Number, default: 0 }
+  payment:{
+    type:String,
   },
+
+  // payment: {
+  //   method: { type: String },
+  //   status: { 
+  //     type: String, 
+  //     enum: ['pending', 'completed', 'failed', 'refunded'], 
+  //     default: 'pending' 
+  //   },
+  //   transactionId: { type: String },
+  //   paymentIntentId: { type: String },
+  //   paidAt: { type: Date },
+  //   refundedAt: { type: Date },
+  //   refundAmount: { type: Number, default: 0 }
+  // },
 
   billing: {
     firstName: { type: String, required: true },

@@ -4,19 +4,21 @@ import { successResponse, errorResponse } from "../../utils/index.js";
 import { calculateTotals } from "../../utils/index.js";
 import CartCourses from "../../models/cart/index.js";
 import Student from "../../models/studentmanagment/student_management.js";
+import { GetCourseDataByid, GetCourseDataForCart } from "../../utils/cart/index.js";
 
 export const addToCart = async (req, res) => {
   try {
     const userId = req.user?._id
-    const {  
-      courseId, 
-      title, 
-      price, 
-      discount = 0, 
-      instituteId, 
-      payment, 
-      billing 
-    } = req.body;
+    const {courseId} = req.params
+    // const {  
+      // courseId, 
+      // title, 
+      // price, 
+      // discount = 0, 
+      // instituteId, 
+      // payment, 
+      // billing 
+    // } = req.body;
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -31,70 +33,73 @@ export const addToCart = async (req, res) => {
     const student = await Student.findOne({userId});
     if (!student) return errorResponse(res, "Student not found");
 
-    const studentName =
-      student.studentName ||
-      `${student.personalInfo?.firstName || ""} ${student.personalInfo?.lastName || ""}`.trim();
+    // const studentName =
+    //   student.studentName ||
+    //   `${student.personalInfo?.firstName || ""} ${student.personalInfo?.lastName || ""}`.trim();
 
-    const email = student.personalInfo?.email || "unknown@email.com";
-    const phoneNumber = student.personalInfo?.phoneNumber || "0000000000";
-    const studentAddress =
-      student.personalInfo?.address?.permanent || student.address?.permanent || {};
+    // const email = student.personalInfo?.email || "unknown@email.com";
+    // const phoneNumber = student.personalInfo?.phoneNumber || "0000000000";
+    // const studentAddress =
+    //   student.personalInfo?.address?.permanent || student.address?.permanent || {};
 
-    // Payment defaults
-    const paymentData = payment || {
-      method: "UPI",
-      status: "pending",
-      transactionId: `TXN-${Date.now()}`,
-    };
+    // // Payment defaults
+    // const paymentData = payment || {
+    //   method: "UPI",
+    //   status: "pending",
+    //   transactionId: `TXN-${Date.now()}`,
+    // };
 
-    // 🧠 Use custom billing if provided, else fall back to student info
-    const billingData = billing || {
-      firstName: student.personalInfo?.firstName || "Unknown",
-      lastName: student.personalInfo?.lastName || "",
-      email,
-      phone: phoneNumber,
-      address: studentAddress,
-    };
+    // // 🧠 Use custom billing if provided, else fall back to student info
+    // const billingData = billing || {
+    //   firstName: student.personalInfo?.firstName || "Unknown",
+    //   lastName: student.personalInfo?.lastName || "",
+    //   email,
+    //   phone: phoneNumber,
+    //   address: studentAddress,
+    // };
 
-    // Find existing active cart
-    let cart = await CartCourses.findOne({ userId, isactive: true, isdeleted: false });
+
+    const {data} = await GetCourseDataByid(courseId)
+
+    if (!data) {
+      return errorResponse(res, "course not found");
+    }
+    
+    let cart = await CartCourses.findOne({ userId, checkout:false });
+
 
     if (!cart) {
-      // Create new cart
       cart = new CartCourses({
         userId,
-        cartname: `${studentName || "Student"}'s Cart`,
-        items: [],
-        billing: billingData,
-        payment: paymentData,
-        isdeleted: false,
-        isactive: true,
+        items:[] ,
+        // billing: billingData,
+        // payment: paymentData,
         status: "pending",
       });
-    } else {
-      // Update existing cart
-      cart.payment = paymentData;
-      cart.billing = billingData; // ✅ now overrides old billing if provided
-    }
+    } 
+    // else {
+    //   cart.payment = paymentData;
+    //   cart.billing = billingData; 
+    // }
 
     // Prevent duplicate course
-    const existingItem = cart.items.find((i) => i.courseId === courseId);
+    const existingItem = cart.items.find((i) => i === data?._id);
     if (existingItem) {
       return successResponse(res, "Course already in cart", cart);
     }
 
+    const subtotal = cart?.pricing?.subtotal + data?.pricing?.price
+
+    const total = subtotal
+
     // Add new course
-    cart.items.push({
-      courseId,
-      title,
-      price,
-      discountPrice: discount || 0,
-      instituteId,
-    });
+    cart.pricing.subtotal = subtotal
+    cart.pricing.total = total
+    cart.items.push(data?._id);
 
     await cart.save();
 
-    return successResponse(res, "Item added to cart", cart);
+    return successResponse(res, "Item added to cart",cart);
   } catch (err) {
     console.error("Add to cart error:", err);
     return errorResponse(res, err.message || "Server error");
@@ -103,7 +108,7 @@ export const addToCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
   try {
-    let { userId } = req.query;
+    let userId = req.user?._id;
 
     if (!userId) return errorResponse(res, "userId is required");
 
@@ -115,11 +120,32 @@ export const getCart = async (req, res) => {
 
     const cart = await CartCourses.findOne({
       userId,
-      isdeleted: false,
-      isactive: true,
+      checkout:false
     });
 
     if (!cart) return errorResponse(res, "No active cart found for this user");
+
+    const {data} = await GetCourseDataForCart({item:cart?.items})
+
+    const output = {...cart._doc,items:data}
+
+    return successResponse(res, "Cart retrieved successfully", output);
+  } catch (err) {
+    return errorResponse(res, err.message || "Server error");
+  }
+};
+
+export const getCartById = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const cart = await CartCourses.findOne({_id:id});
+
+    if (!cart) return errorResponse(res, "No active cart found for this user");
+
+    // const {data} = await GetCourseDataForCart({item:cart?.items})
+
+    // const output = {...cart._doc,items:data}
 
     return successResponse(res, "Cart retrieved successfully", cart);
   } catch (err) {
