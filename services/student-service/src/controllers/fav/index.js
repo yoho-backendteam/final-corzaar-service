@@ -38,7 +38,7 @@ export const getFavorites = async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return errorResponse(res, "userId required");
-    const fav = await FavoriteCourses.findOne({ userId, isactive: true, isdeleted: false });
+    const fav = await FavoriteCourses.findOne({ _id:userId, isactive: true, isdeleted: false });
     if (!fav) return errorResponse(res, "No favorites found");
     return successResponse(res, "Favorites fetched successfully", fav);
   } catch (err) {

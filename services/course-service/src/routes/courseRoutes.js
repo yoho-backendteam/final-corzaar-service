@@ -32,9 +32,9 @@ router.get("/featured",PermissionVerify(["open","merchant","admin"]), getFeature
 router.get("/trending",PermissionVerify(["open","merchant","admin"]), getTrendingCourses);
 
 router.get("/",PermissionVerify(["open","merchant","admin"]), getCourses);
-router.get("/all",PermissionVerify(["open","merchant","admin"]), getallcorses);
+router.get("/all", getallcorses);
 router.post("/",PermissionVerify(["merchant"]), createCourse);
-router.get("/getCourseById/:id",PermissionVerify(["open","merchant","admin"]), getCourseById);
+router.get("/getCourseById/:id", getCourseById);
 router.get("/getCourseBymerchant",PermissionVerify(["merchant","admin"]), getCourseByInstitute);
 router.get("/getCourseBybranch/:id",PermissionVerify(["open","merchant","admin"]), getCourseByBranch);
 router.put("/:id", 

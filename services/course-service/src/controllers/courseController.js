@@ -91,7 +91,7 @@ export const getallcorses = async (req, res) => {
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ message: "Course not found" });
+    if (!course) return res.status(200).json({ message: "Course not found"});
     res.json({
       message: "Course retrieved successfully",
       data: course

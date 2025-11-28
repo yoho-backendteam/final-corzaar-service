@@ -30,14 +30,25 @@ export const addInstituteFav = async (req, res) => {
 
 export const getInstituteFav = async (req, res) => {
   try {
-    const { userId } = req.body;
-    const fav = await InstituteFavorites.findOne({ userId, isactive: true, isdeleted: false });
-    if (!fav) return errorResponse(res, "No favorites found");
-    return successResponse(res, "Favorites fetched successfully", fav);
+    const { userId } = req.params;
+
+    const fav = await InstituteFavorites.findOne({
+      userId,
+      isactive: true,
+      isdeleted: false,
+    });
+
+    return successResponse(
+      res,
+      "Favorites fetched successfully",
+      fav || { favorites: [] }
+    );
+
   } catch (err) {
     return errorResponse(res, err.message);
   }
 };
+
 
 export const removeInstituteFav = async (req, res) => {
   try {

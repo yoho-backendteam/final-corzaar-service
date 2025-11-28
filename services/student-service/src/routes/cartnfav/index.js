@@ -28,6 +28,6 @@ cartroute.delete('/fav/remove-favourite/:courseId',removeFavoriteList)
 cartroute.delete('/fav/clear',clearFavorites)
 //favinstitute
 cartroute.post('/fav/institute',validateRequest(addInstituteFavValidator),addInstituteFav)
-cartroute.get('/fav/getinstitute',validateRequest(getInstituteFavValidator),getInstituteFav)
+cartroute.get('/fav/getinstitute/:userId',validateRequest(getInstituteFavValidator),getInstituteFav)
 cartroute.delete('/fav/remove-ins/:instituteId',removeInstituteFav)
 export default cartroute
