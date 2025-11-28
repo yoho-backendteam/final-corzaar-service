@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "@dotenvx/dotenvx";
 import './src/config/db.config.js'
 import routes from "./src/routes/index.js";
-// import cors from "cors";
+import cors from "cors";
 
 dotenv.config()
 
