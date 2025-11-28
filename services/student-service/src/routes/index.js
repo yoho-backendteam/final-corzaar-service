@@ -9,7 +9,7 @@ const routes = express.Router()
 routes.use('/student_management', studentRouter);
 routes.use("/enrollment",PermissionVerify(["student","noob","merchant","admin"]),orderRouter)
 routes.use("/enroll_application",enrollAppRouter)
-routes.use("/cart",PermissionVerify(["student","noob","open"]),cartroute)
+routes.use("/cart",cartroute)
 
 
 export default routes;
