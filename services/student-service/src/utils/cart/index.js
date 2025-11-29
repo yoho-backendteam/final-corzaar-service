@@ -2,6 +2,14 @@ import axios from "axios";
 import dotenv from "@dotenvx/dotenvx"
 dotenv.config()
 
+export const GetInstituteByUserId=async(id)=>{
+    const response = await axios.get(`http://localhost:${process.env.merchant_service_url}/api/getbyuserId/${id}`).catch((err)=>{
+        console.log(err)
+    })
+    return response?.data;
+}
+
+
 export const calculateTotals = (items = [], coupon = null) => {
   const subtotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
   const itemDiscounts = items.reduce((sum, item) => sum + (item.discountPrice || 0), 0);
