@@ -19,8 +19,6 @@ import contentRoutes from "../routes/coursecontent/routes.js";
 import reviewRoutes from "../routes/coursereview/routes.js";
 import { authorize } from "../middelwares/authorizationClient.js";
 import { PermissionVerify } from "../middelwares/index.js";
-import route from "../../../merchant-service/institute/routes/routes.js";
-
 
 
 const router = express.Router();
