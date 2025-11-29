@@ -234,7 +234,7 @@ export const getInstitutesStudents = async (req, res) => {
 
     // check if institute exists
     const institute = await Institute.findById(id);
-    if (!institute) return errorResponse(res, "Institute not found", 404);
+    if (!institute) return errorResponse(res, "Institute not found", 400);
 
     // fetch all students
     const allStudents = await fetchStudents(process.env.student)
