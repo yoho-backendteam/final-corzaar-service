@@ -23,7 +23,7 @@ export const updateProfile = async (req,res) => {
   const { id } = req.params;
   const updateData = req.body;
   try {
-    const response = await axios.put(`http://localhost:3009/admin/updatebyid/${id}`, updateData);
+    const response = await AdminModel.find  ( updateData);
     res.status(200).json({response: response.data,
       Message: "Updated successfully",
        Status:"Success"
