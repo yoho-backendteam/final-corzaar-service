@@ -24,9 +24,8 @@ const safeFetch = async (url, label) => {
 export const AttendanceCreate = async (req, res) => {
     try {
         const { courseId, batchId, date, attendance } = req.body;
-
-        const batchUrl = process.env.API_BATCH.replace(":courseId", courseId);
-        const batch = await safeFetch(`${batchUrl}/${batchId}`, "Batch API");
+        const batch = await safeFetch(`${process.env.course_url}/api/course/${courseId}/batch/${batchId}`, "Batch API");
+        console.log("batch",batch,"jkfkjk")
 
         if (!batch) {
             return res.status(404).json({ message: "Batch not found" });
@@ -289,7 +288,7 @@ export const GetAllStudentFullAttendance = async (req, res) => {
                 d.attendance.forEach(a => studentIdsInAttendance.add(a.studentId.toString()));
             });
         });
-        const relevantStudents = allStudentsData.filter(s => studentIdsInAttendance.has(s._id));
+        const relevantStudents = allStudentsData?.filter(s => studentIdsInAttendance.has(s._id));
         const allDates = [];
         allAttendance.forEach(att => {
             att.dateId.forEach(d => {
@@ -307,7 +306,7 @@ export const GetAllStudentFullAttendance = async (req, res) => {
                 });
             });
         });
-        const result = relevantStudents.map(stu => {
+        const result = relevantStudents?.map(stu => {
             const records = allDates.map(d => ({
                 date: d,
                 status: attendanceMap.get(`${stu._id}-${d}`) || "Absent"
@@ -328,7 +327,7 @@ export const GetAllStudentFullAttendance = async (req, res) => {
 
         res.status(200).json({
             message: "Full attendance of all students fetched successfully",
-            totalStudents: result.length,
+            totalStudents: result?.length,
             dates: allDates,
             data: result
         });
