@@ -5,6 +5,7 @@ import { PermissionVerify } from '../../middelwares/index.js';
 
 const batchRoute = express.Router();
 
+batchRoute.get("/batch/all",getallbatch)
 batchRoute.post("/:courseid/batch",PermissionVerify(["merchant"]),createBatch)
 batchRoute.get("/:courseId/batch",PermissionVerify(["open","merchant","admin"]),getBatchByCourse)
 batchRoute.get("/student/:studentId/batch",getBatchByStudent)
@@ -17,7 +18,6 @@ batchRoute.put("/:courseid/batch/:batchid/content",PermissionVerify(["merchant"]
 batchRoute.put("/:courseid/batch/:batchid/feature",PermissionVerify(["merchant"]),updateBatchSetting)
 batchRoute.get("/:courseid/batch/:batchid/feature",getBatchSetting)
 batchRoute.get("/batch/search",getBatchBySearch)
-batchRoute.get("/batch/all",getallbatch)
 
 batchRoute.get("/batch/bymerchant/getall",PermissionVerify(["merchant"]), getBatchByInstitute);
 

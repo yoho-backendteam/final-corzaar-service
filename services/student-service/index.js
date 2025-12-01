@@ -7,7 +7,7 @@ import cors from "cors";
 dotenv.config()
 
 const app = express()
-app.use(cors()) 
+// app.use(cors()) 
 
 const PORT = process.env.student_service_url || 3003
 

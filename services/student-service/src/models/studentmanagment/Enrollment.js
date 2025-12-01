@@ -12,6 +12,7 @@ const EnrollmentSchema = new mongoose.Schema({
 
   instituteId:{
     type:mongoose.Types.ObjectId,
+    required:true
   },
 
 

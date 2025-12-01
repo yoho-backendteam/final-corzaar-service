@@ -13,6 +13,8 @@ export const AuthVerify=( resource = [])=>async(req,res,next)=>{
                 }
         
                 const decoded = await JWTDecoded(token)
+
+                console.log("decoded token",decoded)
         
                 if (decoded.status === "failed" && decoded.message === "jwt expired") {
                     return res.status(401).json({message: "Your session has expired. Please log in again", status: "session_expired" });

@@ -13,7 +13,7 @@ export const getStudentPortfolio = async (req, res) => {
     }
 
     // 🔹 Fetch student
-    const student = await student_management.findById(id);
+    const student = await student_management.findOne({userId:id});
     if (!student) {
       return res.status(404).json({
         success: false,

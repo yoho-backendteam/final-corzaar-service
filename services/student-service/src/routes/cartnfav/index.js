@@ -22,12 +22,12 @@ cartroute.post("/checkout/single", checkoutSingleCartItem);
 cartroute.post("/buy", checkoutDirectCourse);
 //fav
 cartroute.post('/fav/add',validateRequest(favSchema),addToFavorites)
-cartroute.get('/fav/get',validateRequest(favSchema),getFavorites)
+cartroute.get('/fav/get',getFavorites)
 cartroute.post("/fav/movetocart",moveToCart)
 cartroute.delete('/fav/remove-favourite/:courseId',removeFavoriteList)
 cartroute.delete('/fav/clear',clearFavorites)
 //favinstitute
 cartroute.post('/fav/institute',validateRequest(addInstituteFavValidator),addInstituteFav)
-cartroute.get('/fav/getinstitute',validateRequest(getInstituteFavValidator),getInstituteFav)
+cartroute.get('/fav/getinstitute/:userId',validateRequest(getInstituteFavValidator),getInstituteFav)
 cartroute.delete('/fav/remove-ins/:instituteId',removeInstituteFav)
 export default cartroute

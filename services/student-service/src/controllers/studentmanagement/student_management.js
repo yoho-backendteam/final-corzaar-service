@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import student_management from '../../models/studentmanagment/student_management.js';
 import { studentJoiSchema, studentUpdateJoiSchema } from '../../validations/studentmanagement/student_management.js';
-import { UpdateProfileFlagAxios } from '../../utils/cart/index.js';
+import { GetInstituteByUserId, UpdateProfileFlagAxios } from '../../utils/cart/index.js';
+import Enrollment from '../../models/studentmanagment/Enrollment.js';
 
 
 
@@ -78,6 +79,68 @@ export const getAllStudents = async (req, res) => {
     });
   }
 };
+
+export const getEnrolledStudents = async (req, res) => {
+  try {
+    const Id = req.user._id; 
+    console.log("mervh",Id)
+
+    const insId = await GetInstituteByUserId(Id)
+    const merchantId = insId?.data?._id
+    console.log("insId",merchantId)
+
+    // 1️⃣ Verify merchant using findOne
+    // const merchant = await Institute.findOne({ _id: merchantId });
+    // if (!merchant) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "Merchant not found or unauthorized",
+    //   });
+    // }
+
+    // 2️⃣ Fetch all students available in DB
+    const students = await Enrollment.find()
+    console.log("all",students)
+
+    const filtered = students.filter(item =>
+  item.status === "confirmed" &&
+  item.items?.some(enrollItem =>
+    enrollItem.instituteId?.toString() === merchantId.toString()
+  )
+);
+
+console.log(filtered, "filt");
+
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No students found.",
+      });
+    }
+
+    // 3️⃣ Filter students that belong to this merchant/institute
+    // const enrolledStudents = students.filter(
+    //   (stu) => stu.instituteId?.toString() === merchantId.toString()
+    // );
+
+    // 4️⃣ Return merchant-specific students only
+    return res.status(200).json({
+      success: true,
+      message: "Fetched students successfully",
+      data : filtered,
+    });
+
+  } catch (error) {
+    console.error("Error retrieving students:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while retrieving students",
+      error: error.message,
+    });
+  }
+};
+
 
 
 

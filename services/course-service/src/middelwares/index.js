@@ -26,7 +26,8 @@ export const PermissionVerify=(resource=[])=>(req,res,next)=>{
             return res.status(401).json({ message: "your not allow to access", status: "not_permitted" });
         }
 
-    } catch (error) {
-        console.log("merchant middelware error",error)
-    }
-}
+  } catch (error) {
+    console.error("Permission middleware error:", error);
+    return res.status(500).json({ status: "failed", message: "Internal server error" });
+  }
+};

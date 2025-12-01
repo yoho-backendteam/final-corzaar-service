@@ -30,7 +30,7 @@ export const getAllActivityLogs = async (req, res) => {
     const logs = await ActivityLog.find({ userid }).sort({ createdAt: -1 });
 
     if (logs.length === 0) {
-      return res.status(404).json({ Message: "No activity logs found for this user" });
+      return res.status(200).json({ Message: "No activity logs found for this user" });
     }
 
     res.status(200).json({
