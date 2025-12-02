@@ -16,44 +16,36 @@ export const createPayment = async (req, res) => {
     const studentApiUrl = `${process.env.student_url}/api/student_management/getbyuserid/${user?._id}`;
     const cartApiUrl = `${process.env.student_url}/api/cart/getbyid/${cartId}`
     const studentResponse = await axios.get(studentApiUrl);
-    const cartResponse = await axios.get(cartApiUrl,{
-      headers:{user:JSON.stringify({role:"open"})}
+    const cartResponse = await axios.get(cartApiUrl, {
+      headers: { user: JSON.stringify({ role: "open" }) }
     })
     const student = studentResponse?.data?.data;
     const cart = cartResponse?.data?.data
-    
     if (!student) {
       return errorResponse(res, "Student not found in student service");
     }
-
     if (!cart) {
       return errorResponse(res, "cart not found in cart service");
     }
-
-    const studentName = student?.personalInfo?.firstname + ' '+student?.personalInfo?.lastname
-
+    const studentName = student?.personalInfo?.firstname + ' ' + student?.personalInfo?.lastname
     const data = {
       studentName,
-      studentId:user?._id,
-      amount:cart?.pricing?.total,
-      type:"Fee",
-      paymentMethod:"UPI",
+      studentId: user?._id,
+      amount: cart?.pricing?.total,
+      type: "Fee",
+      paymentMethod: "UPI",
       cartId,
     }
-
     const payment = new PaymentTransaction(data);
     await payment.save();
-
-    const enrollresponse = await axios.post(`${process.env.student_url}/api/enrollment/create`,{
-          cartId,paymentId:payment?._id
-      },{
-        headers:{
-          user:JSON.stringify(user)
-        }
-      })
-
+    const enrollresponse = await axios.post(`${process.env.student_url}/api/enrollment/create`, {
+      cartId, paymentId: payment?._id
+    }, {
+      headers: {
+        user: JSON.stringify(user)
+      }
+    })
     const enroll = enrollresponse?.data?.data
-
     return successResponse(res, "Payment transaction and registration successfull ", enroll);
   } catch (error) {
     console.log(error)
@@ -79,7 +71,7 @@ export const getAllPayments = async (req, res) => {
     return res.status(200).json({
       status: "success",
       success: true,
-      message: `${message}`, 
+      message: `${message}`,
       data,
     });
 
@@ -87,7 +79,7 @@ export const getAllPayments = async (req, res) => {
     return res.status(500).json({
       status: "error",
       success: false,
-      message: `${error.message}`, 
+      message: `${error.message}`,
     });
   }
 };
@@ -203,17 +195,40 @@ export const trackPayments = async (req, res) => {
 
 export const getallpayementfull = async (req, res) => {
   try {
-    const payments = await PaymentTransaction.find({isdeleted: false });
-    return successResponse(res, "payment fetched successfully", payments);
+    const payments = await PaymentTransaction.find({ isdeleted: false });
+    const enrichedPayments = await Promise.all(
+      payments.map(async (payment) => {
+        try {
+          const studentApiUrl = `${process.env.student_url}/api/student_management/getbyid/${payment.studentId}`;
+          const studentResponse = await axios.get(studentApiUrl);
+          const student = studentResponse?.data?.data || null;
+          const StudentName = student?.fullName
+          return {
+            ...payment.toObject(),
+            StudentName,
+          };
+        } catch (err) {
+          console.error("Student fetch error:", err.message);
+
+          return {
+            ...payment.toObject(),
+            student: null,
+          };
+        }
+      })
+    );
+
+    return successResponse(res, "Payments fetched successfully", enrichedPayments);
   } catch (error) {
+    console.error("Error fetching payments:", error.message);
     return errorResponse(res, error.message);
   }
-}
+};
 
 export const getByIdpayement = async (req, res) => {
   try {
-    const {paymentId} = req.params
-    const payments = await PaymentTransaction.find({_id:paymentId,isdeleted: false });
+    const { paymentId } = req.params
+    const payments = await PaymentTransaction.find({ _id: paymentId, isdeleted: false });
     return successResponse(res, "payment fetched successfully", payments);
   } catch (error) {
     return errorResponse(res, error.message);
