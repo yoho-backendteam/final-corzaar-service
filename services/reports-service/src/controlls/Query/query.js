@@ -1,9 +1,14 @@
 import Query from "../../models/Query/query_schema.js"
+import { GetInstituteByUserId } from "../../utils/helper.js";
 import { queryValidationSchema, queryReceiveSchema } from "../../validation/Query/query.js";
 import axios from "axios";
 
 const querysend = async (req, res) => {
   try {
+    const user = req.user
+    
+    const { data } = await GetInstituteByUserId(user?._id)
+    console.log('data',data)
     const { senderId, senderRole, queries } = req.body;
 
     const newQuery = new Query({
