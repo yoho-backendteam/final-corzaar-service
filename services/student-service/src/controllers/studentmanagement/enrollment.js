@@ -33,44 +33,43 @@ export const createOrderController = async (req, res) => {
     
     const output = {...cart._doc,items:data}
 
-    const items =[]
+    let savedOrder;
 
-    output.items.forEach((data)=>{
-        const item = {
-          courseId:data?._id,
-          title:data?.title,
-          price:data?.pricing?.price,
-          instituteId:data?.instituteId?._id
+    output.items.forEach(async(data)=>{
+
+        const enroll = {
+          userId:user?._id,
+          instituteId:data?.instituteId?._id,
+          courseDetails:{
+              courseId:data?._id,
+              title:data?.title,
+              price:data?.pricing?.price,
+              batchId:data?.batch?._id
+          },
+          pricing: {
+            subtotal: output?.pricing?.subtotal,
+            discount: output?.coupon?.discountAmount,
+            tax: output?.pricing?.tax,
+            total: output?.pricing?.total,
+            currency:output?.pricing?.currency
+          },
+          payment: paymentId,
+          billing: {
+            firstName: student?.personalInfo?.firstName,
+            lastName: student?.personalInfo?.lastName,
+            email:student?.personalInfo?.email,
+            phone: student?.personalInfo?.phoneNumber,
+            address: student?.personalInfo?.address,
+          },
         }
 
-        items.push(item)
+        const newOrder = new Enrollment(enroll);
+        savedOrder = await newOrder.save();
+
+        await CartCourses.findOneAndUpdate({_id:cartId},{checkout:true})
+  
     })
-
-    const enroll = {
-      userId:user?._id,
-      items:items,
-      pricing: {
-        subtotal: output?.pricing?.subtotal,
-        discount: output?.coupon?.discountAmount,
-        tax: output?.pricing?.tax,
-        total: output?.pricing?.total,
-        currency:output?.pricing?.currency
-      },
-      payment: paymentId,
-      billing: {
-        firstName: student?.personalInfo?.firstName,
-        lastName: student?.personalInfo?.lastName,
-        email:student?.personalInfo?.email,
-        phone: student?.personalInfo?.phoneNumber,
-        address: student?.personalInfo?.address,
-      },
-    }
-
-    const newOrder = new Enrollment(enroll);
-    const savedOrder = await newOrder.save();
-
-    await CartCourses.findOneAndUpdate({_id:cartId},{checkout:true})
-    return res.status(201).json({
+      return res.status(201).json({
       success: true,
       message: "Order created successfully",
       data: savedOrder,

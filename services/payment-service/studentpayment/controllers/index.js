@@ -17,7 +17,7 @@ export const createPayment = async (req, res) => {
     const cartApiUrl = `${process.env.student_url}/api/cart/getbyid/${cartId}`
     const studentResponse = await axios.get(studentApiUrl);
     const cartResponse = await axios.get(cartApiUrl,{
-      headers:{user:JSON.stringify({role:"open"})}
+      headers:{user:JSON.stringify(req.user)}
     })
     const student = studentResponse?.data?.data;
     const cart = cartResponse?.data?.data

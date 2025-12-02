@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
+const courses = new mongoose.Schema({
+      courseId:{
+        type:mongoose.Types.ObjectId,
+      },
+      batchId:{
+        type:mongoose.Types.ObjectId,
+      },
+})
+
 const CartSchema = new mongoose.Schema(
   {
     cartId: { type: String, default: uuidv4, unique:true },
@@ -8,9 +17,7 @@ const CartSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "Student", required: true },
     isdeleted: { type: Boolean, default: false },
     isactive: { type: Boolean, default: true },
-    items: [{
-      type:mongoose.Types.ObjectId,
-    }],
+    items: [courses],
     pricing: {
       subtotal: { type: Number, default: 0 },
       tax: { type: Number, default: 0 },

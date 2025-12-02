@@ -21,13 +21,23 @@ const EnrollmentSchema = new mongoose.Schema({
              ref: "Student"
     },
 
-  items: [{
+  cartId:{
+    type:mongoose.Types.ObjectId,
+  },
+  // items: [{
+  //   courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+  //   title: { type: String, required: true },
+  //   price: { type: Number, required: true },
+  //   discountPrice: { type: Number, default: 0 },
+  //   instituteId: {type: mongoose.Schema.Types.ObjectId, ref: "Institute" }
+  // }],
+  items:{
     courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
     title: { type: String, required: true },
     price: { type: Number, required: true },
     discountPrice: { type: Number, default: 0 },
-    instituteId: {type: mongoose.Schema.Types.ObjectId, ref: "Institute" }
-  }],
+    batchId:{type:mongoose.Types.ObjectId, required:true}
+  },
 
   pricing: {
     subtotal: { type: Number, required: true },

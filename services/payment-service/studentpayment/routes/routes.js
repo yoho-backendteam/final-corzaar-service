@@ -9,7 +9,6 @@ import { PermissionVerify } from "../middleware/index.js"
 
 export const route = express.Router()
 route.post("/student/create",
-    // ,validate(createPaymentValidation)
     PermissionVerify(["student","noob"])
     , createPayment)
 route.get('/student/getall/:id',getAllPayments)

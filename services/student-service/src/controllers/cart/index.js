@@ -4,21 +4,13 @@ import { successResponse, errorResponse } from "../../utils/index.js";
 import { calculateTotals } from "../../utils/index.js";
 import CartCourses from "../../models/cart/index.js";
 import Student from "../../models/studentmanagment/student_management.js";
-import { GetCourseDataByid, GetCourseDataForCart } from "../../utils/cart/index.js";
+import { GetBatchData, GetCourseDataByid, GetCourseDataForCart } from "../../utils/cart/index.js";
 
 export const addToCart = async (req, res) => {
   try {
     const userId = req.user?._id
     const {courseId} = req.params
-    // const {  
-      // courseId, 
-      // title, 
-      // price, 
-      // discount = 0, 
-      // instituteId, 
-      // payment, 
-      // billing 
-    // } = req.body;
+    const {batchId}=req.params
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -33,33 +25,7 @@ export const addToCart = async (req, res) => {
     const student = await Student.findOne({userId});
     if (!student) return errorResponse(res, "Student not found");
 
-    // const studentName =
-    //   student.studentName ||
-    //   `${student.personalInfo?.firstName || ""} ${student.personalInfo?.lastName || ""}`.trim();
-
-    // const email = student.personalInfo?.email || "unknown@email.com";
-    // const phoneNumber = student.personalInfo?.phoneNumber || "0000000000";
-    // const studentAddress =
-    //   student.personalInfo?.address?.permanent || student.address?.permanent || {};
-
-    // // Payment defaults
-    // const paymentData = payment || {
-    //   method: "UPI",
-    //   status: "pending",
-    //   transactionId: `TXN-${Date.now()}`,
-    // };
-
-    // // 🧠 Use custom billing if provided, else fall back to student info
-    // const billingData = billing || {
-    //   firstName: student.personalInfo?.firstName || "Unknown",
-    //   lastName: student.personalInfo?.lastName || "",
-    //   email,
-    //   phone: phoneNumber,
-    //   address: studentAddress,
-    // };
-
-
-    const {data} = await GetCourseDataByid(courseId)
+    const data = await GetCourseDataByid(courseId)
 
     if (!data) {
       return errorResponse(res, "course not found");
@@ -72,34 +38,35 @@ export const addToCart = async (req, res) => {
       cart = new CartCourses({
         userId,
         items:[] ,
-        // billing: billingData,
-        // payment: paymentData,
         status: "pending",
       });
     } 
-    // else {
-    //   cart.payment = paymentData;
-    //   cart.billing = billingData; 
-    // }
-
-    // Prevent duplicate course
-    const existingItem = cart.items.find((i) => i === data?._id);
+    const existingItem = cart.items.find((i) => i?.courseId === data?._id);
     if (existingItem) {
       return successResponse(res, "Course already in cart", cart);
     }
 
-    const subtotal = cart?.pricing?.subtotal + data?.pricing?.price
+    const batch = await GetBatchData(data?._id,batchId)
 
-    const total = subtotal
+    if (batch) {
+      if (parseInt(batch?.totalSeats) != parseInt(batch?.seatFilled)) {
+        
+        const subtotal = cart?.pricing?.subtotal + data?.pricing?.price
 
-    // Add new course
-    cart.pricing.subtotal = subtotal
-    cart.pricing.total = total
-    cart.items.push(data?._id);
+        const total = subtotal
+        cart.pricing.subtotal = subtotal
+        cart.pricing.total = total
+        cart.items.push({courseId:data?._id,batchId:batch?._id});
 
-    await cart.save();
+        await cart.save();
+        return successResponse(res, "Item added to cart",cart);
+      }else{
+        return errorResponse(res, "batch seats are already filled..");
+      }
+    }else{
+       return errorResponse(res, "batch not found");
+    }
 
-    return successResponse(res, "Item added to cart",cart);
   } catch (err) {
     console.error("Add to cart error:", err);
     return errorResponse(res, err.message || "Server error");

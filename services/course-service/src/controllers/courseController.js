@@ -1,3 +1,4 @@
+import { Batch } from "../models/batch/batchSchema.js";
 import { Course } from "../models/coursemodel.js";
 import { GetInstituteBId, GetInstituteByUserId } from "../utils/axiosHelpers.js";
 import { createCourseSchema, updateCourseSchema } from "../validations/courseValidation.js";
@@ -359,13 +360,15 @@ export const GetCartCourseData = async(req,res)=>{
     let finaldata = [];
 
     for (let index of item) {
-       let course = await Course.findOne({_id:index}).select("_id uuid title shortDescription instituteId branchId duration pricing")
+       let course = await Course.findOne({_id:index.courseId}).select("_id uuid title shortDescription instituteId branchId duration pricing")
 
       if (course) {
   
         const {data} = await GetInstituteBId(course?.instituteId)
 
-        let obj ={...course._doc,instituteId:data}  
+        const batch = await Batch.findOne({courseId:index.courseId,_id:index.batchId}).select("_id  schedule seatsAvailable  seatsFilled totalSeats batchId")
+
+        let obj ={...course._doc,instituteId:data,batch}  
   
         finaldata.push(obj)
       }

@@ -9,7 +9,7 @@ import{addInstituteFav, getInstituteFav, removeInstituteFav} from "../../control
 import { checkoutAllCart, checkoutDirectCourse, checkoutSingleCartItem } from "../../controllers/cartcontroller/index.js"
 export const cartroute = express.Router()
 
-cartroute.post('/addtocart/:courseId',addToCart)
+cartroute.post('/addtocart/:courseId/:batchId',addToCart)
 cartroute.delete('/remove/:id',validateRequest(removeItemValidator) ,removeItem)
 cartroute.get('/',getCart)
 cartroute.get('/getbyid/:id',getCartById)

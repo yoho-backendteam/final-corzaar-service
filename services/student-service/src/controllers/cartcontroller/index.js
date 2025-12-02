@@ -30,7 +30,7 @@ export const checkoutAllCart = async (req, res) => {
       return res.status(400).json({ message: "No active items in cart" });
     }
 
-    const allItems = carts.flatMap(cart => cart.items);
+    const allItems = cart.flatMap(cart => cart.items);
 
     const totalAmount = allItems.reduce((sum, item) => sum + (item.price || 0), 0);
 

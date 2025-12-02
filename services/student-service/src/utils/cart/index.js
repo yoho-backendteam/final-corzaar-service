@@ -26,7 +26,7 @@ export const GetCourseDataByid=async(id)=>{
     headers:{user:JSON.stringify({role:"open"})}
   })
   .then((response)=>{
-    return response?.data
+    return response?.data?.data
   })
   .catch((err)=>{
     console.error("course fetching error:",err)
@@ -62,6 +62,21 @@ export const GetPaymentById=async(id)=>{
   })
   .catch((err)=>{
     console.error("payment fetching error:",err)
+  })
+
+  return res
+}
+
+export const GetBatchData=async(courseId,batchId)=>{
+ const res = axios.get(`${process.env.course_url}/api/course/${courseId}/batch/${batchId}`,{
+    headers:{user:JSON.stringify({role:"open"})}
+  })
+  .then((response)=>{
+    const {data} = response?.data
+    return data
+  })
+  .catch((err)=>{
+    console.error("course fetching error:",err)
   })
 
   return res

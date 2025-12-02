@@ -7,7 +7,7 @@ const batchRoute = express.Router();
 
 batchRoute.get("/batch/all",getallbatch)
 batchRoute.post("/:courseid/batch",PermissionVerify(["merchant"]),createBatch)
-batchRoute.get("/:courseId/batch",PermissionVerify(["open","merchant","admin"]),getBatchByCourse)
+batchRoute.get("/:courseId/batch",getBatchByCourse)
 batchRoute.get("/student/:studentId/batch",getBatchByStudent)
 batchRoute.get("/batch/:merchantId",getAllBatch)
 batchRoute.get("/:courseid/batch/:batchid",getBatchByBatchId)
