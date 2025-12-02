@@ -12,16 +12,15 @@ const querySchema = new mongoose.Schema(
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin_Register",
-      
     },
     senderRole: {
       type: String,
-      enum: ["User", "Merchant", "Admin"],
+      enum: ["user", "merchant", "admin"],
       required: true,
     },
     queries: {
           _id:false,
-          senderRole: { type: String, enum: ["User", "Merchant", "Admin"], required: true },
+          senderRole: { type: String, enum: ["user", "merchant", "admin"], required: true },
           query: { type: String, required: true },
           response: { type: String, default: "" },
           status: {

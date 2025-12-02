@@ -104,7 +104,7 @@ routes.use("/reviews",createProxyMiddleware({
     timeout:10000,
 }))
 
-routes.use("/reports",createProxyMiddleware({
+routes.use("/reports",AuthVerify,createProxyMiddleware({
     target:process.env.reports_url,
     changeOrigin:true,
     agent,
