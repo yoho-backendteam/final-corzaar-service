@@ -22,7 +22,7 @@ const locationSchema = Joi.object({
 
 // Main validations
 export const createBranchValidation = Joi.object({
-  instituteId: Joi.string().required(),
+  instituteId: Joi.string(),
   branchCode: Joi.string().required(),
   name: Joi.string().required(),
   description: Joi.string().allow(""),

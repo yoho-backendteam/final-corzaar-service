@@ -1,6 +1,25 @@
 import { createInstitutePaymentManualValidation } from '../../validation/index.js';
 import axios from'axios'
 import { InstitutePayment } from '../models/paymentSchema.js';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const safeFetch = async (url, label) => {
+    try {
+        const res = await axios.get(url);
+        return res?.data?.data || res.data || [];
+    } catch (err) {
+        console.error(`${label} Fetch Error`, {
+            message: err.message,
+            url,
+            code: err.code,
+            status: err.response?.status,
+            response: err.response?.data,
+        });
+        return null;
+    }
+};
 
 // http://localhost:3002/api/merchant/getall
 
@@ -25,9 +44,11 @@ export const createPayment = async (req, res) => {
       });
     }
 
-    const data = await getData("http://localhost:3002/api/getall")
+    
+    const data = await safeFetch(`${process.env.course_url}/api/getall`, "merchant API");
+    console.log(data,"merchant")
 
-    const verifyId = data.data.some((merchant) => merchant._id === value.instituteId);
+    const verifyId = data?.data?.some((merchant) => merchant._id === value.instituteId);
 
     if(!verifyId) return res.status(400).json({
         success: false,

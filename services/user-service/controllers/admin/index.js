@@ -58,7 +58,7 @@ export const AdminLogin = async(req,res)=>{
 export const GetAdminProfile=async(req,res)=>{
     try {
         const user = req.user
-
+        
         res.status(200).json({status:true,message:"profile data fetched",data:user})
     } catch (error) {
         res.status(500).json({status:false,message:error.message})
