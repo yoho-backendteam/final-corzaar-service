@@ -17,7 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json())
-const PORT = process.env.notification_service_url || 3007;
+const PORT = process.env.notification_service_url || 3005;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

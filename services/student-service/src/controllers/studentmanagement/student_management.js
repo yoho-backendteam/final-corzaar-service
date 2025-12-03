@@ -100,16 +100,12 @@ export const getEnrolledStudents = async (req, res) => {
 
     // 2️⃣ Fetch all students available in DB
     const students = await Enrollment.find()
-    console.log("all",students)
 
     const filtered = students.filter(item =>
   item.status === "confirmed" &&
-  item.items?.some(enrollItem =>
-    enrollItem.instituteId?.toString() === merchantId.toString()
-  )
+  item.instituteId?.toString() === merchantId.toString()
 );
 
-console.log(filtered, "filt");
 
 
     if (!students || students.length === 0) {
@@ -142,17 +138,14 @@ console.log(filtered, "filt");
 };
 
 
-
-
-
 export const getStudentById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const student = await student_management.findById(id);
+    const student = await student_management.findOne({userId: id});
 
     if (!student) {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
         message: 'Student not found.'
       });

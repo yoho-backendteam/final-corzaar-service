@@ -7,7 +7,7 @@ export const getData = async (url, options = {}) => {
   try {
     const response = await axios.get(url, {
       timeout: 8000,
-      ...options, 
+      ...options,
     });
     return response.data;
   } catch (error) {
@@ -60,17 +60,17 @@ export const getDashboardData = async (req, res) => {
 
     const recentResponse = await safeCall(
       "enrollments",
-      getData(`${process.env.student_url}/api/enrollment/getall`)
+      getData(`${process.env.student_url}/api/enrollment/getall`, merchantHeader(user))
     );
+    // console.log("recenmt",recentResponse,"rrrrrrrrrrr")
 
     const batchResponse = await safeCall(
       "batches",
       getData(
-        `${process.env.course_url}/api/courses/getCourseBymerchant`,
-        merchantHeader(user)
+        `${process.env.course_url}/api/course/batch/bymerchant/getall`, merchantHeader(user)
       )
     );
-
+     console.log("recenmt",batchResponse,"rrrrrrrrrrr")
     // ----------- SAFE DATA EXTRACTION -----------
     const courses = coursesResponse?.data || [];
     const students = studentsResponse?.data || [];
@@ -92,9 +92,10 @@ export const getDashboardData = async (req, res) => {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5)
       .map((enroll) => ({
-        studentName: enroll.studentName || "Unknown",
-        courseName: enroll.courseName || "N/A",
+        studentName: enroll.billing.firstName || "Unknown",
+        courseName: enroll.items[0].title || "N/A",
         date: enroll.createdAt,
+        amount: enroll.pricing.total,
         status: enroll.status || "Pending",
       }));
 

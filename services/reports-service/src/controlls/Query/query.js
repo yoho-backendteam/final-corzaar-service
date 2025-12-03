@@ -48,7 +48,7 @@ export const queryreceive = async (req, res) => {
     console.log('data',user)
     const { data } = await GetInstituteByUserId(user?._id)
     console.log('dataset',data._id)
-    const receiverId = data?._id
+    const receiverId = data?._id  
   if(senderRole === "user")
 {
   try {
