@@ -7,7 +7,7 @@ import { PermissionVerify } from "../middelwares/index.js";
 const routes = express.Router()
 
 routes.use('/student_management', studentRouter);
-routes.use("/enrollment",PermissionVerify(["student","noob","merchant","admin"]),orderRouter)
+routes.use("/enrollment",PermissionVerify(["student","noob","merchant","admin","open"]),orderRouter)
 routes.use("/enroll_application",enrollAppRouter)
 routes.use("/cart",PermissionVerify(["student","noob"]),cartroute)
 

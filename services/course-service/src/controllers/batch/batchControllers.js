@@ -386,6 +386,7 @@ export const getBatchByInstitute = async (req, res) => {
   try {
      const user = req.user 
      const { data } = await GetInstituteByUserId(user?._id)
+     console.log("data",data,"eeee")
 
      const batches = await Batch.find({merchantId:data?._id,isdeleted:false})
 

@@ -19,6 +19,6 @@ batchRoute.put("/:courseid/batch/:batchid/feature",PermissionVerify(["merchant"]
 batchRoute.get("/:courseid/batch/:batchid/feature",getBatchSetting)
 batchRoute.get("/batch/search",getBatchBySearch)
 
-batchRoute.get("/batch/bymerchant/getall",PermissionVerify(["merchant"]), getBatchByInstitute);
+batchRoute.get("/batch/bymerchant/getall",PermissionVerify(["merchant","open"]), getBatchByInstitute);
 
 export default batchRoute
