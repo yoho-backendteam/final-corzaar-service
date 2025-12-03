@@ -6,7 +6,7 @@ export const GetInstituteByUserId=async(id)=>{
     const response = await axios.get(`${process.env.merchant_url}/api/getbyuserId/${id}`).catch((err)=>{
         console.log(err)
     })
-    return response.data
+    return response?.data
 }
 
 export const GetInstituteBId=async(id)=>{
@@ -18,4 +18,11 @@ export const GetInstituteBId=async(id)=>{
         console.log(err)
     })
     return response
+}
+
+export const GetBatchByCourse=async(id)=>{
+    const response = await axios.get(`${process.env.merchant_url}/api/getbyuserId/${id}`).catch((err)=>{
+        console.log(err)
+    })
+    return response.data
 }

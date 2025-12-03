@@ -108,8 +108,22 @@ export const getCourseByInstitute = async (req, res) => {
     const user = req.user
     const { data } = await GetInstituteByUserId(user?._id)
     const course = await Course.find({ instituteId: data?._id });
+    const id = course.map((i) => i._id)
+    const courseData = []
+    const batches= await Promise.all( course.map(async (i) => {
+          const courseId = i._id
+            let batch = await Batch.find({courseId})
+            batch = {...i.toObject(),batch}
+            courseData.push(batch)
+          }))
+    
+    
+    // console.log("cour",course)
+    // console.log("rrrr",batch)
+    console.log(id,"coid")
+
     if (!course) return res.status(404).json({ message: "Course not found" });
-    res.json(course);
+    res.json(courseData);
   } catch (error) {
     console.error("Get Course Error:", error);
     res.status(500).json({ message: "Server error fetching course" });

@@ -9,6 +9,13 @@ export const GetInstituteByUserId=async(id)=>{
     return response?.data;
 }
 
+export const GetUserData=async(id)=>{
+    const response = await axios.get(`http://localhost:${process.env.student_service_url}/api/student_management/getbyid/${id}`).catch((err)=>{
+        console.log(err)
+    })
+    return response?.data;
+}
+
 
 export const calculateTotals = (items = [], coupon = null) => {
   const subtotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
