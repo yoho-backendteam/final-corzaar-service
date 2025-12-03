@@ -6,10 +6,10 @@ import axios from "axios";
 
 const querysend = async (req, res) => {
   try {
-    const user = req.user 
-    console.log('data',user)
+    const user = req.user
+    console.log('data', user)
     const { data } = await GetInstituteByUserId(user?._id)
-    console.log('dataset',data)
+    console.log('dataset', data)
     const senderId = data._id;
     const senderRole = user.role.toLowerCase();
     const { queries } = req.body;
@@ -43,65 +43,65 @@ const querysend = async (req, res) => {
 
 // controllers/queryController.js
 export const queryreceive = async (req, res) => {
-  const {senderRole} = req.params
-  const user = req.user 
-    console.log('data',user)
-    const { data } = await GetInstituteByUserId(user?._id)
-    console.log('dataset',data._id)
-    const receiverId = data?._id
-  if(senderRole === "user")
-{
-  try {
-    const queryDocs = await Query.find({receiverId})
-    console.log("que",queryDocs)
-    return res.status(200).json({
-      Message: "Queries fetched successfully",
-      data: queryDocs,
-    });
-  } catch (err) {
-    console.error("Error fetching queries:", err);
-    return res.status(500).json({
-      Message: "Internal server error",
-      Error: err.message,
-    });
-  }
-}
-  else if(senderRole === "merchant") {
+  const { senderRole } = req.params
+  const user = req.user
+  console.log('data', user)
+
+  if (senderRole === "user") {
     try {
-    const queryDocs = await Query.find({senderRole:"merchant"})
-    return res.status(200).json({
-      Message: "Queries fetched successfully",
-      data: queryDocs,
-    });
-  } catch (err) {
-    console.error("Error fetching queries:", err);
-    return res.status(500).json({
-      Message: "Internal server error",
-      Error: err.message,
-    });
+      const { data } = await GetInstituteByUserId(user?._id)
+      console.log('dataset', data._id)
+      const receiverId = data?._id
+      const queryDocs = await Query.find({ receiverId })
+      console.log("que", queryDocs)
+      return res.status(200).json({
+        Message: "Queries fetched successfully",
+        data: queryDocs,
+      });
+    } catch (err) {
+      console.error("Error fetching queries:", err);
+      return res.status(500).json({
+        Message: "Internal server error",
+        Error: err.message,
+      });
+    }
   }
+  else if (senderRole === "merchant") {
+    try {
+      const queryDocs = await Query.find({ senderRole: "merchant" })
+      return res.status(200).json({
+        Message: "Queries fetched successfully",
+        data: queryDocs,
+      });
+    } catch (err) {
+      console.error("Error fetching queries:", err);
+      return res.status(500).json({
+        Message: "Internal server error",
+        Error: err.message,
+      });
+    }
   }
   else {
-     try {
-    const queryDocs = await Query.find()
-    return res.status(200).json({
-      Message: "Queries fetched successfully",
-      data: queryDocs,
-    });
-  } catch (err) {
-    console.error("Error fetching queries:", err);
-    return res.status(500).json({
-      Message: "Internal server error",
-      Error: err.message,
-    });
-  }
+    try {
+      const queryDocs = await Query.find()
+      return res.status(200).json({
+        Message: "Queries fetched successfully",
+        data: queryDocs,
+      });
+    } catch (err) {
+      console.error("Error fetching queries:", err);
+      return res.status(500).json({
+        Message: "Internal server error",
+        Error: err.message,
+      });
+    }
   }
 };
 
 
 const adminqueryreply = async (req, res) => {
-  const{queryId} = req.params
-  const {  response } = req.body;
+  const { queryId } = req.params
+  const { response } = req.body;
 
   try {
     if (!response) {
@@ -174,7 +174,7 @@ const adminReceiveQueries = async (req, res) => {
     });
   }
 };
-const markQueryResolved = async (req,res) => {
+const markQueryResolved = async (req, res) => {
   const { queryId } = req.params;
 
   if (!queryId) {
@@ -209,4 +209,4 @@ const markQueryResolved = async (req,res) => {
   }
 };
 
-export default { querysend, queryreceive,adminqueryreply,adminReceiveQueries,markQueryResolved } 
+export default { querysend, queryreceive, adminqueryreply, adminReceiveQueries, markQueryResolved } 

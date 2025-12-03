@@ -49,7 +49,7 @@ export const getAdminDashboardData = async (req, res) => {
       .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const adminCommission = studentRevenue;
-    
+
     const instituteRevenue = Ipayments
       ?.filter((ip) => ip.requestStatus?.toLowerCase() === "success")
       .reduce((sum, ip) => sum + Number(ip.amount || 0), 0);
