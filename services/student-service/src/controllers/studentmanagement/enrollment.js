@@ -1,7 +1,7 @@
 import CartCourses from "../../models/cart/index.js";
 import Enrollment from "../../models/studentmanagment/Enrollment.js";
 import student_management from "../../models/studentmanagment/student_management.js";
-import { GetCourseDataForCart, GetPaymentById } from "../../utils/cart/index.js";
+import { GetBatchData, GetCourseDataForCart, GetPaymentById, GetUserData } from "../../utils/cart/index.js";
 import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
 import mongoose from "mongoose";
 
@@ -110,13 +110,23 @@ export const getAllOrdersController = async (req, res) => {
     
     const skip = (Number(page) - 1) * Number(limit);
 
+    const batchData = []
     
     const orders = await Enrollment.find(query)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(Number(limit))
-      .populate("userId");
 
+
+      const batches= await Promise.all( orders.map(async (i) => {
+        let batch = await GetBatchData(i.items.courseId,i.items.batchId)
+        let userData = await GetUserData(i.userId)
+        batch = {...i.toObject(),batch,userData}
+        batchData.push(batch)
+      }))
+
+      // const user = http://localhost:3000/student/api/student_management/getbyid/691d8d28340440bf767c5b1d
+      // console.log(orders,"oooo")
     const totalOrders = await Enrollment.countDocuments(query);
 
     return res.status(200).json({
@@ -127,7 +137,7 @@ export const getAllOrdersController = async (req, res) => {
         currentPage: Number(page),
         totalPages: Math.ceil(totalOrders / limit),
       },
-      data: orders,
+      data: batchData,
     });
   } catch (err) {
     console.error("Error fetching orders:", err);

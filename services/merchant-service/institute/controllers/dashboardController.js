@@ -6,7 +6,7 @@ import axios from "axios";
 export const getData = async (url, options = {}) => {
   try {
     const response = await axios.get(url, {
-      timeout: 8000,
+      timeout: 2000,
       ...options,
     });
     return response.data;
@@ -93,7 +93,7 @@ export const getDashboardData = async (req, res) => {
       .slice(0, 5)
       .map((enroll) => ({
         studentName: enroll.billing.firstName || "Unknown",
-        courseName: enroll.items[0].title || "N/A",
+        // courseName: enroll.items[0].title || "N/A",
         date: enroll.createdAt,
         amount: enroll.pricing.total,
         status: enroll.status || "Pending",

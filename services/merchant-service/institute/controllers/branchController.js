@@ -7,6 +7,7 @@ import {
   instituteIdValidation 
 } from "../validation/branchValidation.js";
 import Institute from "../models/index.js";
+// import { getData } from "../utils/apiHelper.js";
 
 export const createBranch = async (req, res) => {
   try {
@@ -409,6 +410,9 @@ export const getAllBranchesByInstitute = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
+
+    // const course = await getData(`${process.env.course_url}/api/courses/getCourseBymerchant`)
+    // console.log("course",course)
 
     const total = await Branch.countDocuments(query);
 

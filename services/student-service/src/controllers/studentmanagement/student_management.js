@@ -55,7 +55,6 @@ export const createStudent = async (req, res) => {
 export const getAllStudents = async (req, res) => {
   try {
     const students = await student_management.find(); 
-
     if (!students || students.length === 0) {
       return res.status(404).json({
         success: false,
