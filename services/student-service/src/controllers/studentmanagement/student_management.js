@@ -145,7 +145,7 @@ export const getStudentById = async (req, res) => {
     const student = await student_management.findOne({userId: id});
 
     if (!student) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Student not found.'
       });
