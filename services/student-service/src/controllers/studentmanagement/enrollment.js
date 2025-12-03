@@ -40,17 +40,17 @@ export const createOrderController = async (req, res) => {
         const enroll = {
           userId:user?._id,
           instituteId:data?.instituteId?._id,
-          courseDetails:{
+          items:{
               courseId:data?._id,
               title:data?.title,
               price:data?.pricing?.price,
               batchId:data?.batch?._id
           },
           pricing: {
-            subtotal: output?.pricing?.subtotal,
+            subtotal: data?.pricing?.price,
             discount: output?.coupon?.discountAmount,
             tax: output?.pricing?.tax,
-            total: output?.pricing?.total,
+            total: data?.pricing?.price,
             currency:output?.pricing?.currency
           },
           payment: paymentId,
