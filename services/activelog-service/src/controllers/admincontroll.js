@@ -3,11 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const safeFetch = async (req,url, label) => {
+const safeFetch = async (req, url, label) => {
   try {
-    const res = await axios.get(url,{
-      headers:{
-        user:JSON.stringify(req.user)
+    const res = await axios.get(url, {
+      headers: {
+        user: JSON.stringify(req.user)
       }
     });
     return res?.data?.data || res.data || [];
@@ -35,20 +35,20 @@ export const getAdminDashboardData = async (req, res) => {
       Ipayments,
       activities,
     ] = await Promise.all([
-      safeFetch(req,`${process.env.merchant_url}${process.env.MERCHANT_API}`, "Merchant API"),
-      safeFetch(req,`${process.env.payment_url}${process.env.PAYMENT_API}`, "SPayment API"),
-      safeFetch(req,`${process.env.course_url}${process.env.COURSE_API}`, "Course API"),
-      safeFetch(req,`${process.env.student_url}${process.env.STUDENT_API}`, "Student API"),
-      safeFetch(req,`${process.env.notification_url}${process.env.NOTIFICATION_API}`, "Notification API"),
-      safeFetch(req,`${process.env.merchant_url}${process.env.PLACEMENT_API}`, "Placement API"),
-      safeFetch(req,`${process.env.payment_url}${process.env.PAYMENTI_API}`, "IPayment API"),
-      safeFetch(req,`${process.env.activity_url}${process.env.ACTIVITY_API}`.replace(":role", "Admin"), "Activity API"),
+      safeFetch(req, `${process.env.merchant_url}${process.env.MERCHANT_API}`, "Merchant API"),
+      safeFetch(req, `${process.env.payment_url}${process.env.PAYMENT_API}`, "SPayment API"),
+      safeFetch(req, `${process.env.course_url}${process.env.COURSE_API}`, "Course API"),
+      safeFetch(req, `${process.env.student_url}${process.env.STUDENT_API}`, "Student API"),
+      safeFetch(req, `${process.env.notification_url}${process.env.NOTIFICATION_API}`, "Notification API"),
+      safeFetch(req, `${process.env.merchant_url}${process.env.PLACEMENT_API}`, "Placement API"),
+      safeFetch(req, `${process.env.payment_url}${process.env.PAYMENTI_API}`, "IPayment API"),
+      safeFetch(req, `${process.env.activity_url}${process.env.ACTIVITY_API}`.replace(":role", "Admin"), "Activity API"),
     ]);
     const studentRevenue = Spayments
       ?.filter((p) => p.status?.toLowerCase() === "completed")
       .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
-    const adminCommission = studentRevenue * 0.1;
+    const adminCommission = studentRevenue;
 
     const instituteRevenue = Ipayments
       ?.filter((ip) => ip.requestStatus?.toLowerCase() === "success")

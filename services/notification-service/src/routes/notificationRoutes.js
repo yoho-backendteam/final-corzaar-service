@@ -14,7 +14,7 @@ import { authorize } from "../middleware/authorizationClient.js";
 
 const router = express.Router();
 
-router.get("/", getNotificationsByType);
+router.get("/", getNotificationsByType); 
 router.post("/", createNotification);
 router.get("/all", getAllNotifications);
 router.get("/:id", getNotificationById);

@@ -1,7 +1,6 @@
 import Joi from "joi";
 
 export const createBatchValidation = Joi.object({
-  merchantId: Joi.required(),
   courseId: Joi.required(),
   students:Joi.array().required(),
   batchName: Joi.string().min(3).max(100).required(),

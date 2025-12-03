@@ -1,20 +1,20 @@
 import Joi from "joi";
 
 export const queryValidationSchema = Joi.object({
-    senderid: Joi.string().required(),
+    senderid: Joi.string(),
 
      query: Joi.alternatives().try(
     Joi.string().min(1),
     Joi.array().items(Joi.string().min(1))
   ).required(),
 
-    senderrole: Joi.string().valid("User", "Admin", "Merchant").required(),
+    senderrole: Joi.string().valid("user", "admin", "merchant").required(),
 });
 
 
 export const queryReceiveSchema = Joi.object({
-  senderId: Joi.string().required(),
-  senderRole: Joi.string().valid("User", "Admin", "Merchant").required() 
+  senderId: Joi.string(),
+  senderRole: Joi.string().valid("user", "admin", "merchant")
 });
 
 

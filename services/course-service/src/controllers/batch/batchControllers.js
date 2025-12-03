@@ -21,6 +21,7 @@ export const createBatch = async (req, res) => {
         }
         
         const { data } = await GetInstituteByUserId(user?._id)
+        console.log(data,"inst id")
 
         const checkId = await Course.findById(courseid)
         if (!checkId) return res.status(400).json({ message: "course not found" })
@@ -69,7 +70,8 @@ export const getAllBatch = async (req, res) => {
 }
 
 //get batch by course
-export const getBatchByCourse = async (req, res) => {
+export const 
+getBatchByCourse = async (req, res) => {
     const { courseId } = req.params
     const { page, limit } = req.query
 
