@@ -26,6 +26,7 @@ export const addToCart = async (req, res) => {
     if (!student) return errorResponse(res, "Student not found");
 
     const data = await GetCourseDataByid(courseId)
+    
 
     if (!data) {
       return errorResponse(res, "course not found");
@@ -41,12 +42,14 @@ export const addToCart = async (req, res) => {
         status: "pending",
       });
     } 
-    const existingItem = cart.items.find((i) => i?.courseId === data?._id);
+    const existingItem = cart.items.find((i) => i?.courseId.toString()  === data?._id);
+    
     if (existingItem) {
-      return successResponse(res, "Course already in cart", cart);
-    }
-
-    const batch = await GetBatchData(data?._id,batchId)
+      
+      return errorResponse(res, "Course already in cart");
+    }else{
+      
+       const batch = await GetBatchData(data?._id,batchId)  
 
     if (batch) {
       if (parseInt(batch?.totalSeats) != parseInt(batch?.seatFilled)) {
@@ -66,6 +69,9 @@ export const addToCart = async (req, res) => {
     }else{
        return errorResponse(res, "batch not found");
     }
+    }
+
+   
 
   } catch (err) {
     console.error("Add to cart error:", err);
