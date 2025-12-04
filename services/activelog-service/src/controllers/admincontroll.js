@@ -48,11 +48,12 @@ export const getAdminDashboardData = async (req, res) => {
       ?.filter((p) => p.status?.toLowerCase() === "completed")
       .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
-    const adminCommission = studentRevenue;
+
 
     const instituteRevenue = Ipayments
       ?.filter((ip) => ip.requestStatus?.toLowerCase() === "success")
       .reduce((sum, ip) => sum + Number(ip.amount || 0), 0);
+    const adminCommission = studentRevenue+instituteRevenue;
 
     const totalRevenue = adminCommission;
     const revenueByDate = {};
@@ -91,11 +92,12 @@ export const getAdminDashboardData = async (req, res) => {
     ).length;
 
     const recentTransactions = Spayments
-      .filter((p) => p.createdAt)
+      .filter((p) => p.createdAt && p.status?.toLowerCase() === "completed")
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 10)
       .map((p) => ({
         transactionId: p.transactionId || p._id,
+        studnetname:p.StudentName,
         amount: p.amount,
         status: p.status?.toLowerCase() || "pending",
         createdAt: p.createdAt,
