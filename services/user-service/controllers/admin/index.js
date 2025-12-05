@@ -41,7 +41,7 @@ export const AdminLogin = async(req,res)=>{
             return res.status(404).json({status:false,message:"user not found"})
         }
 
-        const verify = bcrypt.hashSync(password,user?.password)
+        const verify = bcrypt.compareSync(password,user?.password)
 
         if (!verify) {
             return res.status(400).json({status:false,message:"incorrect password"})
