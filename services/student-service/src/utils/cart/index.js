@@ -16,6 +16,16 @@ export const GetUserData=async(id)=>{
     return response?.data;
 }
 
+export const GetBranchData=async(option = {})=>{
+    const response = await axios.get(`http://localhost:${process.env.merchant_service_url}/api/branch/byinstitute`,
+      {
+      ...option,
+    }).catch((err)=>{
+        console.log(err)
+    })
+    return response?.data;
+}
+
 
 export const calculateTotals = (items = [], coupon = null) => {
   const subtotal = items.reduce((sum, item) => sum + (item.price || 0), 0);

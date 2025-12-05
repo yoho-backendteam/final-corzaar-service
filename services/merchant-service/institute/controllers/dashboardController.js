@@ -45,7 +45,7 @@ export const getDashboardData = async (req, res) => {
     
     const coursesResponse = await safeCall(
       "courses",
-      getData(`${process.env.course_url}/api/courses`, merchantHeader(user))
+      getData(`${process.env.course_url}/api/courses/getCourseBymerchant`, merchantHeader(user))
     );
 
     const studentsResponse = await safeCall(
@@ -70,9 +70,9 @@ export const getDashboardData = async (req, res) => {
         `${process.env.course_url}/api/course/batch/bymerchant/getall`, merchantHeader(user)
       )
     );
-     console.log("recenmt",batchResponse,"rrrrrrrrrrr")
+     console.log("recenmt",coursesResponse,"rrrrrrrrrrr")
     // ----------- SAFE DATA EXTRACTION -----------
-    const courses = coursesResponse?.data || [];
+    const courses = coursesResponse|| [];
     const students = studentsResponse?.data || [];
     const notifications = notificationResponse?.data || [];
     const enrollments = recentResponse?.data || [];
@@ -104,8 +104,9 @@ export const getDashboardData = async (req, res) => {
       .slice(0, 5)
       .map((course) => ({
         title: course.title,
+        batches: course.batch.length,
         category: course.category?.primary || "N/A",
-        enrolledCount: course.enrolledCount || 0,
+        enrolledCount:Math.round(course.batch.reduce((sum,i) => i.seatsFilled+sum,0)),
         rating: course.rating || "N/A",
         instructor: course.instructorName || "Unknown",
         isActive: course.is_active,
