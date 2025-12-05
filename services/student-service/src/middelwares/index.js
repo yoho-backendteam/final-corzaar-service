@@ -8,6 +8,8 @@ export const PermissionVerify=(resource=[])=>(req,res,next)=>{
         }
 
         console.log(user)
+        console.log(user._id);
+        
 
         const userRole = user?.role
         if (userRole === "student" && resource.includes(userRole)) {

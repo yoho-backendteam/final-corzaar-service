@@ -9,8 +9,8 @@ import { GetBatchData, GetCourseDataByid, GetCourseDataForCart } from "../../uti
 export const addToCart = async (req, res) => {
   try {
     const userId = req.user?._id
-    const {courseId} = req.params
-    const {batchId}=req.params
+    const { courseId } = req.params
+    const { batchId } = req.params
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -22,56 +22,56 @@ export const addToCart = async (req, res) => {
     }
 
     // Fetch student info
-    const student = await Student.findOne({userId});
+    const student = await Student.findOne({ userId });
     if (!student) return errorResponse(res, "Student not found");
 
     const data = await GetCourseDataByid(courseId)
-    
+
 
     if (!data) {
       return errorResponse(res, "course not found");
     }
-    
-    let cart = await CartCourses.findOne({ userId, checkout:false });
+
+    let cart = await CartCourses.findOne({ userId, checkout: false });
 
 
     if (!cart) {
       cart = new CartCourses({
         userId,
-        items:[] ,
+        items: [],
         status: "pending",
       });
-    } 
-    const existingItem = cart.items.find((i) => i?.courseId.toString()  === data?._id);
-    
+    }
+    const existingItem = cart.items.find((i) => i?.courseId.toString() === data?._id);
+
     if (existingItem) {
-      
+
       return errorResponse(res, "Course already in cart");
-    }else{
-      
-       const batch = await GetBatchData(data?._id,batchId)  
+    } else {
 
-    if (batch) {
-      if (parseInt(batch?.totalSeats) != parseInt(batch?.seatFilled)) {
-        
-        const subtotal = cart?.pricing?.subtotal + data?.pricing?.price
+      const batch = await GetBatchData(data?._id, batchId)
 
-        const total = subtotal
-        cart.pricing.subtotal = subtotal
-        cart.pricing.total = total
-        cart.items.push({courseId:data?._id,batchId:batch?._id});
+      if (batch) {
+        if (parseInt(batch?.totalSeats) != parseInt(batch?.seatFilled)) {
 
-        await cart.save();
-        return successResponse(res, "Item added to cart",cart);
-      }else{
-        return errorResponse(res, "batch seats are already filled..");
+          const subtotal = cart?.pricing?.subtotal + data?.pricing?.price
+
+          const total = subtotal
+          cart.pricing.subtotal = subtotal
+          cart.pricing.total = total
+          cart.items.push({ courseId: data?._id, batchId: batch?._id });
+
+          await cart.save();
+          return successResponse(res, "Item added to cart", cart);
+        } else {
+          return errorResponse(res, "batch seats are already filled..");
+        }
+      } else {
+        return errorResponse(res, "batch not found");
       }
-    }else{
-       return errorResponse(res, "batch not found");
-    }
     }
 
-   
+
 
   } catch (err) {
     console.error("Add to cart error:", err);
@@ -85,7 +85,7 @@ export const getCart = async (req, res) => {
 
     if (!userId) return errorResponse(res, "userId is required");
 
-  
+
     userId = userId.trim();
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return errorResponse(res, "Invalid userId format");
@@ -93,14 +93,14 @@ export const getCart = async (req, res) => {
 
     const cart = await CartCourses.findOne({
       userId,
-      checkout:false
+      checkout: false
     });
 
     if (!cart) return errorResponse(res, "No active cart found for this user");
 
-    const {data} = await GetCourseDataForCart({item:cart?.items})
+    const { data } = await GetCourseDataForCart({ item: cart?.items })
 
-    const output = {...cart._doc,items:data}
+    const output = { ...cart._doc, items: data }
 
     return successResponse(res, "Cart retrieved successfully", output);
   } catch (err) {
@@ -110,9 +110,9 @@ export const getCart = async (req, res) => {
 
 export const getCartById = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
-    const cart = await CartCourses.findOne({_id:id});
+    const cart = await CartCourses.findOne({ _id: id });
 
     if (!cart) return errorResponse(res, "No active cart found for this user");
 
@@ -128,8 +128,8 @@ export const getCartById = async (req, res) => {
 
 export const removeItem = async (req, res) => {
   try {
-    const { userId } = req.body; // comes from validator
-    const { id: courseId } = req.params;
+    let userId = req.user?._id;
+    const courseId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(courseId)) {
       return errorResponse(res, "Invalid userId or courseId format");
@@ -138,7 +138,7 @@ export const removeItem = async (req, res) => {
     const cart = await CartCourses.findOne({ userId, isactive: true, isdeleted: false });
     if (!cart) return errorResponse(res, "Cart not found");
 
-   
+
     const itemIndex = cart.items.findIndex(
       (item) => item.courseId.toString() === courseId.toString()
     );
