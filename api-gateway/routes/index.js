@@ -68,7 +68,7 @@ routes.use("/logs",AuthVerify,createProxyMiddleware({
     timeout:10000,
 }))
 
-routes.use("/other",AuthVerify,createProxyMiddleware({
+routes.use("/other",createProxyMiddleware({
     target:process.env.other_url,
     changeOrigin:true,
      agent,
