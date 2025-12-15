@@ -1,5 +1,5 @@
 import express from "express"
-import { createInstitute, deleteinstitutebyid, getByIdInstitutes, getInstituteCourses, getInstituteForCourse, getInstitutes, getInstitutesByUserId, getInstitutesStudents, getNearbyInstitutes, searchInstitutes, updateInstitute} from "../controllers/index.js"
+import { createInstitute, deleteinstitutebyid, getByIdInstitutes, getInstituteCourses, getInstituteForCourse, getInstitutes, getInstitutesBytoken, getInstitutesByUserId, getInstitutesStudents, getNearbyInstitutes, searchInstitutes, updateInstitute} from "../controllers/index.js"
 import { createInstituteValidation } from "../validation/index.js";
 import { validate } from "../middlewares/validate.js";
 import { updateInstituteValidation } from "../validation/update.js";
@@ -25,6 +25,7 @@ route.get("/getall/:id/courses",getInstituteCourses)
 route.get('/:id/search',searchInstitutes)
 route.get('/getnearby',getNearbyInstitutes)
 route.get('/getbyuserId/:id',getInstitutesByUserId)
+route.get('/getbytoken',PermissionVerify(["merchant"]),getInstitutesBytoken)
 route.get('/getforcourse/:id',getInstituteForCourse)
 
 

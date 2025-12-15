@@ -14,10 +14,10 @@ export const getData = async (url) => {
 
 export const ProfileUpdate=async(id)=>{
   try {
-    const response = await axios.patch(`${process.env.auth_url}/api/merchant//iscompleted/${id}`, { timeout: 5000 });
+    const response = await axios.patch(`${process.env.auth_url}/api/merchant/iscompleted/${id}`, { timeout: 5000 });
     return response.data;
   } catch (error) {
-    console.error("❌ Error update profile:", url, error.message);
+    console.error("❌ Error update profile:", error.message);
     throw error; // IMPORTANT
   }
 }

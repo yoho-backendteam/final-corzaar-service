@@ -167,6 +167,16 @@ export const getInstitutesByUserId = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+export const getInstitutesBytoken = async (req, res) => {
+  try {
+    const { id } = req.user._id
+    const institutes = await Institute.findOne({ userId: id })
+
+    return successResponse(res, "Institutes fetched successfully", institutes);
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
 
 export const getInstituteForCourse = async (req, res) => {
   try {
