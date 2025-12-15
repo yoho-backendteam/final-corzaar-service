@@ -12,18 +12,36 @@ const getCourseById = async(url) => {
     } catch (error) {
         console.log(error);
     }
-}
+} 
 
 // Create Offer
 export const createOffer = async (req, res) => {
+  console.log("entry");
+  console.log("req body etry",req.body);
+  
+  
   try {
+    console.log("entry try");   
+    
     const { error } = offerValidation.validate(req.body);
+    console.log("status",error);
+    
+    
     if (error) return res.status(400).json({ message: error.details[0].message });
-
-    req.body.uuid = generateUUID();
+    console.log("before");
+    // console.log("from other",generateUUID());       
+    const UUID=generateUUID()     
+    console.log("uuid",UUID);   
+    ("uuid",UUID)
+    // console.log("req",req);
+    
+    console.log("body",req.body);
+    
+    req.body.uuid = UUID;
+    console.log("after check",req.body.uuid);
     const offer = await Offer.create(req.body);
     res.status(201).json(offer);
-  } catch (err) {
+  } catch (err) {    
     console.error(err);
     res.status(500).json({ message: err.message });
   }
@@ -68,7 +86,7 @@ export const getOfferById = async (req, res) => {
 
 // Update Offer
 export const updateOffer = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params;  
 
   try {
     const { error } = offerUpdateValidation.validate(req.body);
@@ -78,7 +96,7 @@ export const updateOffer = async (req, res) => {
     if ("status" in req.body) {
       delete req.body.status;
     }
-
+ 
     const offer = await Offer.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
@@ -100,8 +118,14 @@ export const updateOffer = async (req, res) => {
 // Delete Offer
 export const deleteOffer = async (req, res) => {
     const {id} = req.params
+    console.log("delete params",req.params);
+    
   try {
+    console.log("entry in try");
+    
     const offer = await Offer.findByIdAndDelete(id);
+    console.log("offer",offer);
+    
     if (!offer) return res.status(404).json({ message: "Offer not found" });
     res.status(200).json({ message: "Offer deleted successfully" });
   } catch (err) {

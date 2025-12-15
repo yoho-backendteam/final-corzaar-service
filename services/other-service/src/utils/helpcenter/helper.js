@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 
 // Generate unique UUID for institute
-export const generateUUID = () => uuidv4();
+export const generateUUID = () => {
+  const id = uuidv4(); 
+  return id;
+};
 export const successResponse = (message, data = null) => ({
   success: true,
   message,
