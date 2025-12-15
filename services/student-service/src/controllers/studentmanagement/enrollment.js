@@ -1,7 +1,7 @@
 import CartCourses from "../../models/cart/index.js";
 import Enrollment from "../../models/studentmanagment/Enrollment.js";
 import student_management from "../../models/studentmanagment/student_management.js";
-import { GetBatchData, GetCourseDataForCart, GetPaymentById, GetUserData } from "../../utils/cart/index.js";
+import { GetBatchData, GetBranchData, GetCourseDataForCart, GetPaymentById, GetUserData } from "../../utils/cart/index.js";
 import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
 import mongoose from "mongoose";
 
@@ -87,8 +87,16 @@ export const createOrderController = async (req, res) => {
 
 
 
+const merchantHeader = (user) => ({
+  headers: {
+    user: JSON.stringify({
+      _id: user._id,          role: user.role,  
+    }),
+  },
+});
 
 export const getAllOrdersController = async (req, res) => {
+  const user = req.user;
   try {
     
     const {
@@ -117,11 +125,13 @@ export const getAllOrdersController = async (req, res) => {
       .skip(skip)
       .limit(Number(limit))
 
-
       const batches= await Promise.all( orders.map(async (i) => {
         let batch = await GetBatchData(i.items.courseId,i.items.batchId)
-        let userData = await GetUserData(i.userId)
-        batch = {...i.toObject(),batch,userData}
+        const userData = await GetUserData(i.userId)
+        const branches = await GetBranchData(merchantHeader(user))
+        const branch = branches?.data?.filter((j) => j._id === batch.courseId.branchId)
+        console.log("branc",branch);
+        batch = {...i.toObject(),batch,userData,branch}
         batchData.push(batch)
       }))
 

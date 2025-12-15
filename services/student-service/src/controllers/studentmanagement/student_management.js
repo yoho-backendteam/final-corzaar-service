@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import student_management from '../../models/studentmanagment/student_management.js';
 import { studentJoiSchema, studentUpdateJoiSchema } from '../../validations/studentmanagement/student_management.js';
-import { GetInstituteByUserId, UpdateProfileFlagAxios } from '../../utils/cart/index.js';
+import { GetBatchData, GetInstituteByUserId, UpdateProfileFlagAxios } from '../../utils/cart/index.js';
 import Enrollment from '../../models/studentmanagment/Enrollment.js';
 
 
@@ -100,11 +100,17 @@ export const getEnrolledStudents = async (req, res) => {
     // 2️⃣ Fetch all students available in DB
     const students = await Enrollment.find()
 
-    const filtered = students.filter(item =>
+    const filtered = []
+    const confirmEnrollment = students.filter(item =>
   item.status === "confirmed" &&
   item.instituteId?.toString() === merchantId.toString()
 );
 
+  const batches= await Promise.all( confirmEnrollment.map(async (i) => {
+          let batch = await GetBatchData(i.items.courseId,i.items.batchId)
+          batch = {...i.toObject(),batch}
+          filtered.push(batch)
+        }))
 
 
     if (!students || students.length === 0) {

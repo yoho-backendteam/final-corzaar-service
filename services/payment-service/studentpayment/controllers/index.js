@@ -202,10 +202,12 @@ export const getallpayementfull = async (req, res) => {
           const studentApiUrl = `${process.env.student_url}/api/student_management/getbyid/${payment.studentId}`;
           const studentResponse = await axios.get(studentApiUrl);
           const student = studentResponse?.data?.data || null;
-          const StudentName = student?.fullName
+          const StudentName = student?.fullName;
+          const studentEmail=student?.personalInfo?.email
           return {
             ...payment.toObject(),
             StudentName,
+            studentEmail,
           };
         } catch (err) {
           console.error("Student fetch error:", err.message);
