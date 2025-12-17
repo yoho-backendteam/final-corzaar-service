@@ -137,15 +137,22 @@ export const getAllOrdersController = async (req, res) => {
       .skip(skip)
       .limit(Number(limit))
 
-    const batches = await Promise.all(orders.map(async (i) => {
-      let batch = await GetBatchData(i.items.courseId, i.items.batchId)
-      const userData = await GetUserData(i.userId)
-      const branches = await GetBranchData(merchantHeader(user))
-      const branch = branches?.data?.filter((j) => j._id === batch.courseId.branchId)
-      console.log("branc", branch);
-      batch = { ...i.toObject(), batch, userData, branch }
-      batchData.push(batch)
-    }))
+    const batches = await Promise.all(
+      orders.map(async (i) => {
+        let batch = await GetBatchData(i.items.courseId, i.items.batchId);
+        const userData = await GetUserData(i.userId);
+        const branches = await GetBranchData(merchantHeader(user));
+        let branch = [];
+        if (batch?.courseId?.branchId) {
+          branch = branches?.data?.filter(
+            (j) => j._id === batch.courseId.branchId
+          );
+        }
+
+        batch = { ...i.toObject(), batch, userData, branch };
+        batchData.push(batch);
+      })
+    );
 
     // const user = http://localhost:3000/student/api/student_management/getbyid/691d8d28340440bf767c5b1d
     // console.log(orders,"oooo")
@@ -236,7 +243,7 @@ export const updateEnrollment = async (req, res) => {
 
     const { id } = req.params
     const { status } = req.body
-    const user=req.user
+    const user = req.user
 
     const enrollment = await Enrollment.findByIdAndUpdate({ _id: id }, { status }, { new: true })
     if (!enrollment) return res.status(404).json({
