@@ -1,41 +1,55 @@
 import { Faq } from "../../models/faqSchema.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 import { faqValidation } from "../../validations/faqValidations.js";
 
 
 // Create FAQ
 export const createFaq = async (req, res) => {
-    try {
-        const { error, value } = faqValidation.validate(req.body);
-        if (error) {
-            return res.status(400).json({ 
-                status: false, 
-                message: error.details[0].message 
-            });
-        }
-
-        const newFaq = new Faq({
-            question: value.question,
-            answer: value.answer,
-            category: value.category,
-            assignedTo: value.assignedTo
-        });
-
-        const savedFaq = await newFaq.save();
-
-        res.status(201).json({
-            status: true,
-            message: "FAQ created successfully",
-            data: savedFaq
-        });
-
-    } catch (error) {
-        console.error("Error creating FAQ:", error);
-        res.status(500).json({ 
-            status: false,
-            message: "Internal server error",
-            error: error.message 
-        });
+  try {
+    const { error, value } = faqValidation.validate(req.body);
+    const user = req.user
+    if (error) {
+      return res.status(400).json({
+        status: false,
+        message: error.details[0].message
+      });
     }
+
+    const newFaq = new Faq({
+      question: value.question,
+      answer: value.answer,
+      category: value.category,
+      assignedTo: value.assignedTo
+    });
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "FAQ",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} FAQ created successfully`,
+    });
+
+
+    const savedFaq = await newFaq.save();
+
+    res.status(201).json({
+      status: true,
+      message: "FAQ created successfully",
+      data: savedFaq
+    });
+
+  } catch (error) {
+    console.error("Error creating FAQ:", error);
+    res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
 };
 
 // Get all FAQs with optional pagination
@@ -60,9 +74,9 @@ export const getFaqs = async (req, res) => {
       data: faqs
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -90,7 +104,7 @@ export const getFaqsByType = async (req, res) => {
     }
 
     const filter = { assignedTo: role };
-    
+
     const faqs = await Faq.find(filter)
       .skip(skip)
       .limit(limit)
@@ -106,9 +120,9 @@ export const getFaqsByType = async (req, res) => {
       data: faqs
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -148,9 +162,9 @@ export const getFaqsByTypeAndCategory = async (req, res) => {
       data: faqs
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -160,9 +174,9 @@ export const getFaqById = async (req, res) => {
   try {
     const faq = await Faq.findById(req.params.id);
     if (!faq) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: false,
-        message: "FAQ not found" 
+        message: "FAQ not found"
       });
     }
     res.status(200).json({
@@ -170,9 +184,9 @@ export const getFaqById = async (req, res) => {
       data: faq
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -181,40 +195,50 @@ export const getFaqById = async (req, res) => {
 export const updateFaq = async (req, res) => {
   try {
     const { error, value } = faqValidation.validate(req.body);
+    const user = req.user
     if (error) {
-      return res.status(400).json({ 
-        status: false, 
-        message: error.details[0].message 
+      return res.status(400).json({
+        status: false,
+        message: error.details[0].message
       });
     }
 
     const faq = await Faq.findByIdAndUpdate(
-      req.params.id, 
+      req.params.id,
       {
         question: value.question,
         answer: value.answer,
         category: value.category,
         assignedTo: value.assignedTo
-      }, 
+      },
       { new: true, runValidators: true }
     );
-    
+
     if (!faq) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: false,
-        message: "FAQ not found" 
+        message: "FAQ not found"
       });
     }
-    
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "FAQ",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} FAQ updated successfully`,
+    });
     res.status(200).json({
       status: true,
       message: "FAQ updated successfully",
       data: faq
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -223,37 +247,48 @@ export const updateFaq = async (req, res) => {
 export const deleteFaq = async (req, res) => {
   try {
     const faq = await Faq.findByIdAndDelete(req.params.id);
+    const user = req.user
     if (!faq) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: false,
-        message: "FAQ not found" 
+        message: "FAQ not found"
       });
     }
-    res.status(200).json({ 
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "FAQ",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} FAQ Deleted successfully`,
+    });
+    res.status(200).json({
       status: true,
-      message: "FAQ deleted successfully" 
+      message: "FAQ deleted successfully"
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: false,
-      message: err.message 
+      message: err.message
     });
   }
 };
 
 // get By Status 
-export const getByStatus = async (req,res) => {
-    try {
-        const { isActive } = req.body
-        console.log("is",isActive)
-        const statusData = await Faq.findOne({isActive})
-        res.status(200)
-        .json({
-            status : 200,
-            data : statusData,
-            message : "success"
-        })
-    } catch (error) {
-        res.status(500).json({Error : error})
-    }
+export const getByStatus = async (req, res) => {
+  try {
+    const { isActive } = req.body
+    console.log("is", isActive)
+    const statusData = await Faq.findOne({ isActive })
+    res.status(200)
+      .json({
+        status: 200,
+        data: statusData,
+        message: "success"
+      })
+  } catch (error) {
+    res.status(500).json({ Error: error })
+  }
 }

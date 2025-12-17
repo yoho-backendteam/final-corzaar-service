@@ -1,12 +1,13 @@
 import Branch from "../models/branchSchema.js";
 import mongoose from "mongoose";
-import { 
-  createBranchValidation, 
-  updateBranchValidation, 
+import {
+  createBranchValidation,
+  updateBranchValidation,
   uuidValidation,
-  instituteIdValidation 
+  instituteIdValidation
 } from "../validation/branchValidation.js";
 import Institute from "../models/index.js";
+import { logActivity } from "../utils/ActivitylogHelper.js";
 // import { getData } from "../utils/apiHelper.js";
 
 export const createBranch = async (req, res) => {
@@ -20,7 +21,7 @@ export const createBranch = async (req, res) => {
       });
     }
 
-    const institute = await Institute.findOne({userId:user?._id})
+    const institute = await Institute.findOne({ userId: user?._id })
     const instituteId = institute?._id
 
 
@@ -38,7 +39,7 @@ export const createBranch = async (req, res) => {
       lastMaintenanceDate
     } = req.body;
 
-   
+
     const existingBranch = await Branch.findOne({
       instituteId,
       branchCode,
@@ -68,6 +69,18 @@ export const createBranch = async (req, res) => {
     });
 
     const savedBranch = await branch.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Branch",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Branch Created successfully`,
+    });
+
+
     await savedBranch.populate('instituteId', 'name uuid');
 
     res.status(201).json({
@@ -105,9 +118,9 @@ export const getBranchesByInstitute = async (req, res) => {
       });
     }
 
-    const query = { 
-      instituteId, 
-      isDeleted: false 
+    const query = {
+      instituteId,
+      isDeleted: false
     };
 
     if (status && status !== 'all') {
@@ -135,7 +148,7 @@ export const getBranchesByInstitute = async (req, res) => {
       }
     });
   } catch (error) {
-  
+
     res.status(500).json({
       success: false,
       message: "Error retrieving branches",
@@ -189,7 +202,8 @@ export const updateBranchByUUID = async (req, res) => {
   try {
     const { uuid } = req.params;
     const updateData = req.body;
-    console.log('reached update',updateData)
+    const user = req.user;
+    console.log('reached update', updateData)
 
     // Validate UUID
     const uuidError = uuidValidation.validate({ uuid }).error;
@@ -242,6 +256,16 @@ export const updateBranchByUUID = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     ).populate('instituteId', 'name uuid');
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Branch",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Branch updated successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -249,7 +273,7 @@ export const updateBranchByUUID = async (req, res) => {
       data: updatedBranch
     });
   } catch (error) {
-    
+
     res.status(500).json({
       success: false,
       message: "Error updating branch",
@@ -274,8 +298,8 @@ export const deleteBranchByUUID = async (req, res) => {
 
     const branch = await Branch.findOneAndUpdate(
       { uuid, isDeleted: false },
-      { 
-        isDeleted: true, 
+      {
+        isDeleted: true,
         isActive: false,
         status: "closed"
       },
@@ -288,6 +312,16 @@ export const deleteBranchByUUID = async (req, res) => {
         message: "Branch not found"
       });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Branch",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Branch Deleted successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -300,7 +334,7 @@ export const deleteBranchByUUID = async (req, res) => {
       }
     });
   } catch (error) {
-  
+
     res.status(500).json({
       success: false,
       message: "Error deleting branch",
@@ -369,7 +403,7 @@ export const getAllBranches = async (req, res) => {
       }
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error retrieving branches",
@@ -387,10 +421,10 @@ export const getAllBranchesByInstitute = async (req, res) => {
       search
     } = req.query;
 
-    
-    const institute = await Institute.findOne({userId:user?._id})
-    
-    const query = {instituteId:institute?._id, isDeleted: false };
+
+    const institute = await Institute.findOne({ userId: user?._id })
+
+    const query = { instituteId: institute?._id, isDeleted: false };
     // Status filter
     if (status && status !== 'all') {
       query.status = status;
@@ -429,7 +463,7 @@ export const getAllBranchesByInstitute = async (req, res) => {
       }
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error retrieving branches",

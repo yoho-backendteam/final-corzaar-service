@@ -1,4 +1,5 @@
 import { Notification } from "../models/notificationModel.js";
+import { logActivity } from "../utils/ActivitylogHelper.js";
 import {
   createNotificationSchema,
   updateNotificationSchema,
@@ -19,6 +20,7 @@ webpush.setVapidDetails(
 export const createNotification = async (req, res) => {
   try {
     const data = req.body;
+    const user = req.user
 
     if (Array.isArray(data)) {
       for (const item of data) {
@@ -50,6 +52,16 @@ export const createNotification = async (req, res) => {
 
     // Create a single notification
     const notification = await Notification.create(data);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Created successfully`,
+    });
     res.status(201).json({ success: true, data: notification });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -102,7 +114,7 @@ export const getNotificationsByType = async (req, res) => {
     const filter = {};
     if (type) filter.type = type;
     if (receiverId) filter.receiverId = receiverId;
-    if (isRead !== undefined) filter.isRead = isRead === "true"; 
+    if (isRead !== undefined) filter.isRead = isRead === "true";
 
     // Pagination
     const pageNum = parseInt(page, 10);
@@ -160,6 +172,7 @@ export const getNotificationById = async (req, res) => {
 export const updateNotification = async (req, res) => {
   try {
     const { error } = updateNotificationSchema.validate(req.body);
+    const user = req.user
     if (error) {
       return res.status(400).json({ success: false, message: error.details[0].message });
     }
@@ -172,6 +185,16 @@ export const updateNotification = async (req, res) => {
     if (!notification) {
       return res.status(404).json({ success: false, message: "Notification not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Updated successfully`,
+    });
 
     res.status(200).json({ success: true, data: notification });
   } catch (err) {
@@ -182,8 +205,19 @@ export const updateNotification = async (req, res) => {
 export const deleteNotification = async (req, res) => {
   try {
     const deleted = await Notification.findByIdAndDelete(req.params.id);
+    const user = req.user
     if (!deleted)
       return res.status(404).json({ success: false, message: "Notification not found" });
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Deleted successfully`,
+    });
     res.status(200).json({ success: true, message: "Notification deleted" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -199,7 +233,7 @@ export const deleteNotification = async (req, res) => {
 //         const latest = await Notification.find();
 
 //     console.log("latest----->",latest);
-    
+
 
 //     if (!latest) {
 //       return res.status(404).json({ message: "No notification found in DB" });
@@ -207,7 +241,7 @@ export const deleteNotification = async (req, res) => {
 
 //     const payload = JSON.stringify({ title: latest.title });
 //     console.log("payload",payload);
-    
+
 
 //     console.log("two");
 
@@ -236,8 +270,8 @@ export const webshow = async (req, res) => {
       return res.status(404).json({ message: "No notification found in DB" });
     }
 
-  
-  
+
+
     // Prepare push payload
     const payload = JSON.stringify({
       title: latest.title || "New Notification",

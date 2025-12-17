@@ -1,4 +1,5 @@
 import { Course } from "../../models/coursemodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 // Get all reviews for a course
 export const getCourseReviews = async (req, res) => {
@@ -16,13 +17,24 @@ export const getCourseReviews = async (req, res) => {
 export const addCourseReview = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
+    const user = req.user;
     if (!course) return res.status(404).json({ message: "Course not found" });
 
     const { userId, name, rating, comment } = req.body;
     const review = { userId, name, rating, comment };
 
     course.reviews.push(review);
-    await course.save(); 
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Course Review",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Review added successfully`,
+    });
+    await course.save();
 
     res.status(201).json({ message: "Review added", review });
   } catch (err) {

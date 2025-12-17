@@ -6,6 +6,7 @@ import dotenv from "dotenv"
 dotenv.config()
 import Branch from "../models/branchSchema.js";
 import { ProfileUpdate } from "../utils/apiHelper.js";
+import { logActivity } from "../utils/ActivitylogHelper.js";
 
 
 export const createInstitute = async (req, res) => {
@@ -39,6 +40,17 @@ export const createInstitute = async (req, res) => {
 
       settings: { allowBookings: true, allowOnsitePayments: true },
       statistics: { totalStudents: 0, totalCourses: 0 },
+    });
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Created Institutes",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Created Institutes successfully`,
     });
 
     await mainBranch.save();
@@ -92,7 +104,7 @@ export const getNearbyInstitutes = async (req, res) => {
           near: { type: "Point", coordinates: [lon, lat] },
           distanceField: "distance",
           spherical: true,
-          maxDistance: distanceInMeters, 
+          maxDistance: distanceInMeters,
           query: { isdeleted: false, isActive: true },
         },
       },
@@ -133,6 +145,8 @@ export const updateInstitute = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    const user = req.user;
+
     const institute = await Institute.findByIdAndUpdate(
       id,
       updates,
@@ -141,6 +155,17 @@ export const updateInstitute = async (req, res) => {
 
 
     if (!institute) return errorResponse(res, "Institute not found", 404);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Institute Updated",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Institute Updated successfully`,
+    });
+
     return successResponse(res, "Institute updated successfully", institute);
   } catch (error) {
     return errorResponse(res, error.message);
@@ -194,6 +219,7 @@ export const getByIdInstitutes = async (req, res) => {
 };
 export const deleteinstitutebyid = async (req, res) => {
   try {
+    const user = req.user;
     const { id } = req.params
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: "Invalid Institute ID format" });
@@ -202,6 +228,17 @@ export const deleteinstitutebyid = async (req, res) => {
     if (!deletedinstitute) {
       return res.status(404).json({ message: "Institute profile not found" })
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Deleted",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Deleted successfully`,
+    });
+
 
     res.status(200).json({ message: "deleted Institute", deletedinstitute })
 

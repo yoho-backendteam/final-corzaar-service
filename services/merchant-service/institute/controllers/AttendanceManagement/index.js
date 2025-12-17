@@ -2,6 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { Attendance } from "../../models/AttendanceManagement/Attendance/index.js";
 import { DateSchema } from "../../models/AttendanceManagement/DateSchema/index.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 dotenv.config();
 
@@ -24,8 +25,9 @@ const safeFetch = async (url, label) => {
 export const AttendanceCreate = async (req, res) => {
     try {
         const { courseId, batchId, date, attendance } = req.body;
+        const user = req.user;
         const batch = await safeFetch(`${process.env.course_url}/api/course/${courseId}/batch/${batchId}`, "Batch API");
-        console.log("batch",batch,"jkfkjk")
+        console.log("batch", batch, "jkfkjk")
 
         if (!batch) {
             return res.status(404).json({ message: "Batch not found" });
@@ -63,6 +65,17 @@ export const AttendanceCreate = async (req, res) => {
             });
             await attendanceRecord.save();
         }
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Attendance",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Attendance Created successfully`,
+        });
+
 
         res.status(201).json({
             message: "Attendance record created successfully",
@@ -140,7 +153,7 @@ export const GetAttendancebyStudentOne = async (req, res) => {
 export const UpdateAttendance = async (req, res) => {
     try {
         const { courseId, batchId, date, attendance } = req.body;
-
+        const user = req.user;
         if (!courseId || !batchId || !date || !attendance) {
             return res.status(400).json({
                 message: "courseId, batchId, date, and attendance are required",
@@ -195,6 +208,18 @@ export const UpdateAttendance = async (req, res) => {
         });
 
         await dateRecord.save();
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Attendance",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Attendance Updated successfully`,
+        });
+
+
 
         res.status(200).json({
             message: "Attendance updated successfully",

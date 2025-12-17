@@ -1,5 +1,5 @@
 
-export const PermissionVerify=(resource=[])=>(req,res,next)=>{
+export const PermissionVerify = (resource = []) => (req, res, next) => {
     try {
         const user = JSON.parse(req.headers["user"])
 
@@ -12,24 +12,24 @@ export const PermissionVerify=(resource=[])=>(req,res,next)=>{
             req.userType = userRole
             req.user = user
             next()
-        }else if (userRole === "noob" && resource.includes(userRole)) {
+        } else if (userRole === "noob" && resource.includes(userRole)) {
             req.userType = userRole
             req.user = user
             next()
-        }else if(userRole === "merchant" && resource.includes(userRole)) {
+        } else if (userRole === "merchant" && resource.includes(userRole)) {
             req.userType = userRole
             req.user = user
             next()
-        }else if(userRole === "admin" && resource.includes(userRole)) {
+        } else if (userRole === "admin" && resource.includes(userRole)) {
             req.userType = userRole
             req.user = user
             console.log("check")
             next()
-        }else {  
+        } else {
             return res.status(401).json({ message: "your not allow to access", status: "not_permitted" });
         }
 
     } catch (error) {
-        console.log("merchant middelware error",error)
+        console.log("merchant middelware error", error)
     }
 }

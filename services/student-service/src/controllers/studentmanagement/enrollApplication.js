@@ -4,14 +4,15 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import student_management from "../../models/studentmanagment/student_management.js";
 import axios from "axios";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 dotenv.config();
 
 export const createEnrollmentApplication = async (req, res) => {
   try {
     const { userId, items, coupon, payment, status } = req.body;
+    const user = req.user 
 
-    
     const student = await student_management.findById(userId);
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
@@ -25,7 +26,7 @@ export const createEnrollmentApplication = async (req, res) => {
       address: student.personalInfo?.address || {},
     };
 
-    
+
     const populatedItems = await Promise.all(
       items.map(async (item) => {
         try {
@@ -46,7 +47,7 @@ export const createEnrollmentApplication = async (req, res) => {
       })
     );
 
-   
+
     const subtotal = populatedItems.reduce((sum, item) => sum + item.price, 0);
     const discount = populatedItems.reduce((sum, item) => sum + item.discountPrice, 0);
     const total = subtotal - discount;
@@ -60,7 +61,7 @@ export const createEnrollmentApplication = async (req, res) => {
       currency: "INR",
     };
 
-    
+
     const enrollment = new Enrollment({
       userId,
       items: populatedItems,
@@ -73,7 +74,7 @@ export const createEnrollmentApplication = async (req, res) => {
 
     await enrollment.save();
 
-  
+
     const pdfBuffer = await generateEnrollmentPDFBuffer(enrollment);
 
     const transporter = nodemailer.createTransport({
@@ -112,6 +113,18 @@ Corzaar Team`,
     });
 
     res.send(pdfBuffer);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Enrollment creation",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Enrollment creation successfully`,
+    });
+
+
   } catch (err) {
     console.error("Enrollment creation failed:", err);
     res.status(500).json({ error: err.message });

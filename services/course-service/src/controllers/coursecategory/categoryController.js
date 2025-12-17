@@ -1,6 +1,9 @@
 import { Category } from "../../models/category/coursecategorymodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 import { createCategorySchema, updateCategorySchema } from "../../validations/courseCategoryValidation.js";
+
 export const createCategory = async (req, res) => {
+  const user = req.user;
   const { error, value } = createCategorySchema.validate(req.body, {
     abortEarly: false,
     stripUnknown: true,
@@ -15,6 +18,16 @@ export const createCategory = async (req, res) => {
 
   try {
     const category = new Category(value);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category Created successfully`,
+    });
     await category.save();
 
     res.status(201).json({
@@ -99,6 +112,7 @@ export const getCategoryById = async (req, res) => {
 // UPDATE
 export const updateCategory = async (req, res) => {
   const id = req.params.id;
+  const user = req.user
 
   const { error, value } = updateCategorySchema.validate(req.body, {
     abortEarly: false,
@@ -122,6 +136,16 @@ export const updateCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category updated successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -140,7 +164,7 @@ export const updateCategory = async (req, res) => {
 // DELETE (soft delete)
 export const deleteCategory = async (req, res) => {
   const id = req.params.id;
-
+  const user = req.user
   try {
     const category = await Category.findOneAndUpdate(
       { uuid: id, is_deleted: false },
@@ -151,6 +175,17 @@ export const deleteCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category deleted successfully`,
+    });
 
     res.status(200).json({
       success: true,

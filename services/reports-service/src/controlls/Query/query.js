@@ -3,6 +3,7 @@ import Query from "../../models/Query/query_schema.js"
 // import { GetInstituteByUserId } from "../../utils/helper.js"""
 import { queryValidationSchema, queryReceiveSchema } from "../../validation/Query/query.js";
 import axios from "axios";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 const querysend = async (req, res) => {
   try {
@@ -27,6 +28,17 @@ const querysend = async (req, res) => {
       },
     });
 
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Query",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"}Query Sended successfully`,
+    });
+
     await newQuery.save();
 
     return res.status(200).json({
@@ -43,30 +55,29 @@ const querysend = async (req, res) => {
 
 // controllers/queryController.js
 export const queryreceive = async (req, res) => {
-  const {senderRole} = req.params
-  const user = req.user 
-    console.log('data',user)
-    const { data } = await GetInstituteByUserId(user?._id)
-    console.log('dataset',data?._id)
-    const receiverId = data?._id  
-  if(senderRole === "user")
-{
-  try {
-    const queryDocs = await Query.find({receiverId})
-    console.log("que",queryDocs)
-    return res.status(200).json({
-      Message: "Queries fetched successfully",
-      data: queryDocs,
-    });
-  } catch (err) {
-    console.error("Error fetching queries:", err);
-    return res.status(500).json({
-      Message: "Internal server error",
-      Error: err.message,
-    });
+  const { senderRole } = req.params
+  const user = req.user
+  console.log('data', user)
+  const { data } = await GetInstituteByUserId(user?._id)
+  console.log('dataset', data?._id)
+  const receiverId = data?._id
+  if (senderRole === "user") {
+    try {
+      const queryDocs = await Query.find({ receiverId })
+      console.log("que", queryDocs)
+      return res.status(200).json({
+        Message: "Queries fetched successfully",
+        data: queryDocs,
+      });
+    } catch (err) {
+      console.error("Error fetching queries:", err);
+      return res.status(500).json({
+        Message: "Internal server error",
+        Error: err.message,
+      });
+    }
   }
-}
-  else if(senderRole === "merchant") {
+  else if (senderRole === "merchant") {
     try {
       const queryDocs = await Query.find({ senderRole: "merchant" })
       return res.status(200).json({
@@ -100,8 +111,10 @@ export const queryreceive = async (req, res) => {
 
 
 const adminqueryreply = async (req, res) => {
-  const { queryId } = req.params
-  const { response } = req.body;
+  const { queryId } = req.params;
+  const { response, senderRole } = req.body;
+  const normalizedSenderRole = senderRole ? senderRole.toLowerCase() : "user";
+  const user = req.user
 
   try {
     if (!response) {
@@ -115,12 +128,23 @@ const adminqueryreply = async (req, res) => {
       return res.status(404).json({ Message: "Query not found" });
     }
 
-    // ✅ Update nested fields inside `queries`
     queryDoc.queries.response = response;
     queryDoc.queries.status = "completed";
     queryDoc.queries.date = new Date();
+    queryDoc.queries.senderRole = normalizedSenderRole;
 
     await queryDoc.save();
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Query",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"}Query response Added successfully`,
+    });
 
     return res.status(200).json({
       Message: "Admin response added successfully",
@@ -194,6 +218,17 @@ const markQueryResolved = async (req, res) => {
     // query.queries.response = req.body.response || query.queries.response;
 
     await query.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Query",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"}Query marked as resolved successfully`,
+    });
+
 
     return res.status(200).json({
       Message: "Query marked as resolved",

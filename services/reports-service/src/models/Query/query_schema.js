@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
@@ -17,18 +16,24 @@ const querySchema = new mongoose.Schema(
       type: String,
       enum: ["user", "merchant", "admin"],
       required: true,
+      set: (value) => value.toLowerCase(),
     },
     queries: {
-          _id:false,
-          senderRole: { type: String, enum: ["user", "merchant", "admin"], required: true },
-          query: { type: String, required: true },
-          response: { type: String, default: "" },
-          status: {
-            type: String,
-            enum: ["incompleted", "completed"],
-            default: "incompleted",
-          },
-          date: { type: Date, default: Date.now },
+      _id: false,
+      senderRole: {
+        type: String,
+        enum: ["user", "merchant", "admin"],
+        required: true,
+        set: (value) => value.toLowerCase()
+      },
+      query: { type: String, required: true },
+      response: { type: String, default: "" },
+      status: {
+        type: String,
+        enum: ["incompleted", "completed"],
+        default: "incompleted",
+      },
+      date: { type: Date, default: Date.now },
     },
     uuid: {
       type: String,
@@ -37,6 +42,7 @@ const querySchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 const Query = mongoose.model("Query", querySchema);
 export default Query;

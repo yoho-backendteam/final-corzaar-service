@@ -7,6 +7,7 @@ import {
 // CREATE
 export const createCategory = async (req, res) => {
   const { error, value } = createCategorySchema.validate(req.body);
+  const user = req.user;
 
   if (error) {
     return res.status(400).json({
@@ -18,6 +19,16 @@ export const createCategory = async (req, res) => {
   try {
     const category = new Category(value);
     await category.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category Created successfully`,
+    });
 
     res.status(201).json({
       success: true,
@@ -99,6 +110,7 @@ export const getCategoryById = async (req, res) => {
 // UPDATE
 export const updateCategory = async (req, res) => {
   const id = req.params.id;
+  const user = req.user
 
   const { error, value } = updateCategorySchema.validate(req.body);
 
@@ -119,6 +131,16 @@ export const updateCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category Updated successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -137,7 +159,7 @@ export const updateCategory = async (req, res) => {
 // DELETE 
 export const deleteCategory = async (req, res) => {
   const id = req.params.id;
-
+  const user = req.user;
   try {
     const category = await Category.findOneAndUpdate(
       { uuid: id },
@@ -148,7 +170,16 @@ export const deleteCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
-
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Category",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Category Deleted successfully`,
+    });
     res.status(200).json({
       success: true,
       message: "Category deleted successfully",

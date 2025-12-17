@@ -1,5 +1,6 @@
 import { Batch } from "../models/batch/batchSchema.js";
 import { Course } from "../models/coursemodel.js";
+import { logActivity } from "../utils/ActivitylogHelper.js";
 import { GetInstituteBId, GetInstituteByUserId } from "../utils/axiosHelpers.js";
 import { createCourseSchema, updateCourseSchema } from "../validations/courseValidation.js";
 
@@ -28,7 +29,18 @@ export const createCourse = async (req, res) => {
 
   try {
     const course = new Course({ ...value, instituteId: data._id });
-    console.log("course",course);
+    console.log("course", course);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Course Created successfully`,
+    });
+
     await course.save();
     res.status(201).json({
       message: "Course created successfully",
@@ -92,7 +104,7 @@ export const getallcorses = async (req, res) => {
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    if (!course) return res.status(200).json({ message: "Course not found"});
+    if (!course) return res.status(200).json({ message: "Course not found" });
     res.json({
       message: "Course retrieved successfully",
       data: course
@@ -110,17 +122,17 @@ export const getCourseByInstitute = async (req, res) => {
     const course = await Course.find({ instituteId: data?._id });
     const id = course.map((i) => i._id)
     const courseData = []
-    const batches= await Promise.all( course.map(async (i) => {
-          const courseId = i._id
-            let batch = await Batch.find({courseId})
-            batch = {...i.toObject(),batch}
-            courseData.push(batch)
-          }))
-    
-    
+    const batches = await Promise.all(course.map(async (i) => {
+      const courseId = i._id
+      let batch = await Batch.find({ courseId })
+      batch = { ...i.toObject(), batch }
+      courseData.push(batch)
+    }))
+
+
     // console.log("cour",course)
     // console.log("rrrr",batch)
-    console.log(id,"coid")
+    console.log(id, "coid")
 
     if (!course) return res.status(404).json({ message: "Course not found" });
     res.json(courseData);
@@ -144,6 +156,7 @@ export const getCourseByBranch = async (req, res) => {
 
 //  Update Course
 export const updateCourse = async (req, res) => {
+  const user = req.user
   try {
     const { error, value } = updateCourseSchema.validate(req.body, {
       abortEarly: false,
@@ -165,6 +178,17 @@ export const updateCourse = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ message: "Course not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Course Updated successfully`,
+    });
+
 
     res.json({
       message: "Course updated successfully",
@@ -181,8 +205,19 @@ export const updateCourse = async (req, res) => {
 export const deleteCourse = async (req, res) => {
   try {
     const deleted = await Course.findByIdAndDelete(req.params.id);
+    const user = req.user;
     if (!deleted) return res.status(404).json({ message: "Course not found" });
-    res.json({ message: "Course deleted successfully" });
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Course delete successfully`,
+    });
+    res.status(201).json({ message: "Course deleted successfully" });
   } catch (error) {
     console.error("Delete Course Error:", error);
     res.status(500).json({ message: "Server error deleting course" });
@@ -367,29 +402,29 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 
-export const GetCartCourseData = async(req,res)=>{
+export const GetCartCourseData = async (req, res) => {
   try {
-    const {item} = req.body
+    const { item } = req.body
 
     let finaldata = [];
 
     for (let index of item) {
-       let course = await Course.findOne({_id:index.courseId}).select("_id uuid title shortDescription instituteId branchId duration pricing")
+      let course = await Course.findOne({ _id: index.courseId }).select("_id uuid title shortDescription instituteId branchId duration pricing")
 
       if (course) {
-  
-        const {data} = await GetInstituteBId(course?.instituteId)
 
-        const batch = await Batch.findOne({courseId:index.courseId,_id:index.batchId}).select("_id  schedule seatsAvailable  seatsFilled totalSeats batchId")
+        const { data } = await GetInstituteBId(course?.instituteId)
 
-        let obj ={...course._doc,instituteId:data,batch}  
-  
+        const batch = await Batch.findOne({ courseId: index.courseId, _id: index.batchId }).select("_id  schedule seatsAvailable  seatsFilled totalSeats batchId")
+
+        let obj = { ...course._doc, instituteId: data, batch }
+
         finaldata.push(obj)
       }
     }
 
-    res.status(200).json({status:true,message:"cart course fetched",data:finaldata})
+    res.status(200).json({ status: true, message: "cart course fetched", data: finaldata })
   } catch (error) {
-    res.status(500).json({stauts:false,message:"internal server error"})
+    res.status(500).json({ stauts: false, message: "internal server error" })
   }
 }

@@ -4,6 +4,7 @@ import { MerchantModel } from "../../models/merchantModel.js"
 import { OtpModel } from "../../models/OtpModel.js"
 import bcrypt from "bcrypt"
 import { JWTEncoded } from "../../utils/AuthHelpers.js"
+import { logActivity } from "../../utils/ActivitylogHelper.js"
 
 export const AdminRegister = async (req, res) => {
     try {
@@ -23,6 +24,16 @@ export const AdminRegister = async (req, res) => {
             })
 
             await user.save()
+            logActivity({
+                userid: user._id.toString(),
+                actorRole: user?.role
+                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                    : "",
+                action: "Register",
+                description: `${user?.role
+                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                    : "User"} Register successfully`,
+            });
 
             res.status(201).json({ status: true, message: "admin created successfully." })
         }
@@ -48,6 +59,17 @@ export const AdminLogin = async (req, res) => {
         }
 
         const token = await JWTEncoded({ email: user?.email, _id: user?._id, OAuth_id: user?.OAuth_id, role: user?.role, phoneNumber: user?.phoneNumber })
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Login",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} logged in successfully`,
+        });
+
 
         res.status(200).json({ status: true, message: "login successfully", data: token })
     } catch (error) {
@@ -93,6 +115,16 @@ export const ChangeAdminPassword = async (req, res) => {
         const hashpass = bcrypt.hashSync(confirmPassword, 13)
 
         await MerchantModel.findOneAndUpdate({ root_id: user?._id }, { password: hashpass })
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Password",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Password Changed successfully`,
+        });
 
         res.status(201).json({ status: true, message: "password updated successfully" })
     } catch (error) {

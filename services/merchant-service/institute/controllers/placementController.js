@@ -26,7 +26,7 @@ export const createPlacement = async (req, res) => {
       });
     }
 
-    const institute = await Institute.findOne({userId:user?._id})
+    const institute = await Institute.findOne({ userId: user?._id })
     const instituteId = institute?._id
 
     const {
@@ -87,6 +87,16 @@ export const createPlacement = async (req, res) => {
 
     const savedPlacement = await placement.save();
     await savedPlacement.populate('instituteId', 'name uuid');
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Placement",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Placement Created successfully`,
+    });
 
     res.status(201).json({
       success: true,
@@ -94,7 +104,7 @@ export const createPlacement = async (req, res) => {
       data: savedPlacement
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error creating placement",
@@ -205,7 +215,7 @@ export const getAllPlacements = async (req, res) => {
       }
     });
   } catch (error) {
-  
+
     res.status(500).json({
       success: false,
       message: "Error retrieving placements",
@@ -214,7 +224,7 @@ export const getAllPlacements = async (req, res) => {
   }
 };
 
-export const getAllPlacementsC=async(req,res)=>{
+export const getAllPlacementsC = async (req, res) => {
   try {
     const placements = await Placement.find({ isDeleted: false })
       .populate('instituteId', 'name uuid logo contactInfo')
@@ -223,7 +233,7 @@ export const getAllPlacementsC=async(req,res)=>{
       message: "All placements retrieved successfully",
       data: placements
     });
-    
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -264,7 +274,7 @@ export const getPlacementByUUID = async (req, res) => {
       data: placement
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error retrieving placement",
@@ -316,6 +326,17 @@ export const updatePlacementByUUID = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     ).populate('instituteId', 'name uuid');
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Placement",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Placement Updated successfully`,
+    });
+
 
     res.status(200).json({
       success: true,
@@ -323,7 +344,7 @@ export const updatePlacementByUUID = async (req, res) => {
       data: updatedPlacement
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error updating placement",
@@ -347,9 +368,9 @@ export const deletePlacementByUUID = async (req, res) => {
 
     const placement = await Placement.findOneAndUpdate(
       { uuid, isDeleted: false },
-      { 
-        isDeleted: true, 
-        isActive: false 
+      {
+        isDeleted: true,
+        isActive: false
       },
       { new: true }
     );
@@ -361,6 +382,17 @@ export const deletePlacementByUUID = async (req, res) => {
         message: "Placement not found or already deleted"
       });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Placement",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Placement Deleted successfully`,
+    });
+
 
     res.status(200).json({
       success: true,
@@ -374,7 +406,7 @@ export const deletePlacementByUUID = async (req, res) => {
       }
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error deleting placement",
@@ -423,7 +455,7 @@ export const getPlacementsByStudent = async (req, res) => {
       }
     });
   } catch (error) {
-  
+
     res.status(500).json({
       success: false,
       message: "Error retrieving student placements",
@@ -454,7 +486,7 @@ export const getPlacementById = async (req, res) => {
       data: placement
     });
   } catch (error) {
-   
+
     res.status(500).json({
       success: false,
       message: "Error retrieving placement",

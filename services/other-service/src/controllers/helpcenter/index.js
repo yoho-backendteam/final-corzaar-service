@@ -1,13 +1,15 @@
 import { errorResponse, generateUUID, successResponse } from "../../utils/helpcenter/helper.js";
 import HelpCenter from "../../models/helpcenter/index.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const createArticle = async (req, res) => {
+  const user = req.user
   try {
     const { title, category, content, keywords, role } = req.body;
-     const uuid = generateUUID();
+    const uuid = generateUUID();
 
     const article = new HelpCenter({
-    uuid,
+      uuid,
       title,
       category,
       content,
@@ -16,6 +18,16 @@ export const createArticle = async (req, res) => {
     });
 
     await article.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Article",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Article created successfully`,
+    });
     return res
       .status(201)
       .json(successResponse("Article created successfully", article));
@@ -23,10 +35,10 @@ export const createArticle = async (req, res) => {
     return res
       .status(500)
       .json(errorResponse("Failed to create article", error.message));
-      
+
   }
 };
- 
+
 export const getAllArticles = async (req, res) => {
   try {
     const { search, role } = req.query;
@@ -53,12 +65,12 @@ export const getAllArticlesCategory = async (req, res) => {
   try {
     const { search, role, category } = req.query;
     const filter = {};
-  if (role) {
-  filter.role = { $regex: new RegExp(`^${role}$`, "i") };
-}
-   if (category) {
-  filter.category = { $regex: new RegExp(`^${category}$`, "i") };
-}
+    if (role) {
+      filter.role = { $regex: new RegExp(`^${role}$`, "i") };
+    }
+    if (category) {
+      filter.category = { $regex: new RegExp(`^${category}$`, "i") };
+    }
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -77,6 +89,7 @@ export const getAllArticlesCategory = async (req, res) => {
 
 export const updateArticle = async (req, res) => {
   try {
+    const user = req.user
     const updated = await HelpCenter.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -84,6 +97,17 @@ export const updateArticle = async (req, res) => {
     );
     if (!updated)
       return res.status(404).json(errorResponse("Article not found"));
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Article",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Article updated successfully`,
+    });
     return res.json(successResponse("Article updated successfully", updated));
   } catch (error) {
     return res
@@ -94,9 +118,19 @@ export const updateArticle = async (req, res) => {
 export const deleteArticle = async (req, res) => {
   try {
     const deleted = await HelpCenter.findByIdAndDelete(req.params.id);
+    const user = req.user
     if (!deleted)
       return res.status(404).json(errorResponse("Article not found"));
-
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Article",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Article deleted successfully`,
+    });
     return res.json(successResponse("Article deleted successfully", deleted));
   } catch (error) {
     return res

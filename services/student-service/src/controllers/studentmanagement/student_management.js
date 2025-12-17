@@ -3,12 +3,13 @@ import student_management from '../../models/studentmanagment/student_management
 import { studentJoiSchema, studentUpdateJoiSchema } from '../../validations/studentmanagement/student_management.js';
 import { GetBatchData, GetInstituteByUserId, UpdateProfileFlagAxios } from '../../utils/cart/index.js';
 import Enrollment from '../../models/studentmanagment/Enrollment.js';
+import { logActivity } from '../../utils/ActivitylogHelper.js';
 
 
 
 export const createStudent = async (req, res) => {
   try {
-    
+
     const user = req.user
     const { error, value } = studentJoiSchema.validate(req.body, { abortEarly: false });
 
@@ -16,22 +17,32 @@ export const createStudent = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Validation error',
-        details: error.details.map(d => d.message) 
+        details: error.details.map(d => d.message)
       });
     }
 
-    
+
     const newStudent = new student_management({
       _id: new mongoose.Types.ObjectId(),
-      userId:user?._id,
+      userId: user?._id,
       ...value,
-      fullName:value?.personalInfo?.fullName
+      fullName: value?.personalInfo?.fullName
     });
 
-  
+
     const savedStudent = await newStudent.save();
 
     UpdateProfileFlagAxios(user?._id)
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student created successfully`,
+    });
 
     res.status(201).json({
       success: true,
@@ -54,7 +65,7 @@ export const createStudent = async (req, res) => {
 
 export const getAllStudents = async (req, res) => {
   try {
-    const students = await student_management.find(); 
+    const students = await student_management.find();
     if (!students || students.length === 0) {
       return res.status(404).json({
         success: false,
@@ -81,12 +92,12 @@ export const getAllStudents = async (req, res) => {
 
 export const getEnrolledStudents = async (req, res) => {
   try {
-    const Id = req.user._id; 
-    console.log("mervh",Id)
+    const Id = req.user._id;
+    console.log("mervh", Id)
 
     const insId = await GetInstituteByUserId(Id)
     const merchantId = insId?.data?._id
-    console.log("insId",merchantId)
+    console.log("insId", merchantId)
 
     // 1️⃣ Verify merchant using findOne
     // const merchant = await Institute.findOne({ _id: merchantId });
@@ -102,15 +113,15 @@ export const getEnrolledStudents = async (req, res) => {
 
     const filtered = []
     const confirmEnrollment = students.filter(item =>
-  item.status === "confirmed" &&
-  item.instituteId?.toString() === merchantId.toString()
-);
+      item.status === "confirmed" &&
+      item.instituteId?.toString() === merchantId.toString()
+    );
 
-  const batches= await Promise.all( confirmEnrollment.map(async (i) => {
-          let batch = await GetBatchData(i.items.courseId,i.items.batchId)
-          batch = {...i.toObject(),batch}
-          filtered.push(batch)
-        }))
+    const batches = await Promise.all(confirmEnrollment.map(async (i) => {
+      let batch = await GetBatchData(i.items.courseId, i.items.batchId)
+      batch = { ...i.toObject(), batch }
+      filtered.push(batch)
+    }))
 
 
     if (!students || students.length === 0) {
@@ -129,7 +140,7 @@ export const getEnrolledStudents = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Fetched students successfully",
-      data : filtered,
+      data: filtered,
     });
 
   } catch (error) {
@@ -147,7 +158,7 @@ export const getStudentById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const student = await student_management.findOne({userId: id});
+    const student = await student_management.findOne({ userId: id });
 
     if (!student) {
       return res.status(404).json({
@@ -175,7 +186,7 @@ export const getStudentByUserId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const student = await student_management.findOne({userId:id});
+    const student = await student_management.findOne({ userId: id });
 
     if (!student) {
       return res.status(404).json({
@@ -205,7 +216,7 @@ export const updateStudentById = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-
+    const user = req.user
     const { error, value } = studentUpdateJoiSchema.validate(updateData, { abortEarly: false });
 
     if (error) {
@@ -216,7 +227,7 @@ export const updateStudentById = async (req, res) => {
       });
     }
 
- 
+
     const updatedStudent = await student_management.findByIdAndUpdate(
       id,
       { $set: value },
@@ -230,7 +241,17 @@ export const updateStudentById = async (req, res) => {
       });
     }
 
-   
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student Updated successfully`,
+    });
+
     res.status(200).json({
       success: true,
       message: 'Student updated successfully!',
@@ -252,7 +273,7 @@ export const updateStudentById = async (req, res) => {
 export const deleteStudentById = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const user = req.user
     const deletedStudent = await student_management.findByIdAndDelete(id);
 
     if (!deletedStudent) {
@@ -261,6 +282,16 @@ export const deleteStudentById = async (req, res) => {
         message: 'Student not found.'
       });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student Deleted successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -315,7 +346,7 @@ export const searchStudents = async (req, res) => {
   try {
     const { studentId, rollNumber, status, semester, name } = req.query;
 
-    
+
     const filter = {};
 
     if (studentId) filter.studentId = { $regex: studentId, $options: 'i' };
@@ -324,7 +355,7 @@ export const searchStudents = async (req, res) => {
     if (semester) filter.semester = Number(semester);
     if (name) filter['personalInfo.emergencyContact.name'] = { $regex: name, $options: 'i' };
 
-  
+
     if (Object.keys(filter).length === 0) {
       return res.status(400).json({
         success: false,

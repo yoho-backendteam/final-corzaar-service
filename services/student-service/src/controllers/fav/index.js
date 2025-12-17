@@ -3,11 +3,13 @@ import FavoriteCourses from "../../models/fav/index.js";
 import CartCourses from "../../models/cart/index.js";
 import { successResponse, errorResponse } from "../../utils/index.js";
 import { calculateTotals } from "../../utils/index.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const addToFavorites = async (req, res) => {
   try {
     const userId = req.user?._id
     const { courseId, title, price, discountPrice, instituteId } = req.body;
+    const user = req.user
 
     if (!mongoose.Types.ObjectId.isValid(userId))
       return errorResponse(res, "Invalid userId format");
@@ -26,6 +28,16 @@ export const addToFavorites = async (req, res) => {
 
     fav.items.push({ courseId, title, price, discountPrice, instituteId });
     await fav.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites Course Added successfully`,
+    });
 
     return successResponse(res, "Course added to favorites", fav);
   } catch (err) {
@@ -38,7 +50,7 @@ export const getFavorites = async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return errorResponse(res, "userId required");
-    const fav = await FavoriteCourses.findOne({ _id:userId, isactive: true, isdeleted: false });
+    const fav = await FavoriteCourses.findOne({ _id: userId, isactive: true, isdeleted: false });
     if (!fav) return errorResponse(res, "No favorites found");
     return successResponse(res, "Favorites fetched successfully", fav);
   } catch (err) {
@@ -50,7 +62,8 @@ export const getFavorites = async (req, res) => {
 export const removeFavoriteList = async (req, res) => {
   try {
     const { userId } = req.body;
-    const { courseId } = req.params; 
+    const { courseId } = req.params;
+    const user = req.user
 
     if (!userId || !courseId)
       return errorResponse(res, "userId and courseId are required");
@@ -72,6 +85,16 @@ export const removeFavoriteList = async (req, res) => {
 
     fav.items.splice(index, 1);
     await fav.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites Course Removed successfully`,
+    });
 
     return successResponse(res, "Course removed from favorites", fav);
   } catch (err) {
@@ -82,6 +105,7 @@ export const removeFavoriteList = async (req, res) => {
 export const moveToCart = async (req, res) => {
   try {
     const { userId, courseId } = req.body;
+    const user = req.user
     if (!userId || !courseId)
       return errorResponse(res, "userId and courseId are required");
 
@@ -124,6 +148,16 @@ export const moveToCart = async (req, res) => {
       (item) => item.courseId.toString() !== courseId.toString()
     );
     await fav.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites Courses Moved to Cart successfully`,
+    });
 
     return successResponse(res, "Course moved to cart successfully", { cart, fav });
   } catch (err) {
@@ -134,11 +168,22 @@ export const moveToCart = async (req, res) => {
 export const clearFavorites = async (req, res) => {
   try {
     const { userId } = req.body;
+    const user = req.user
     const favorites = await FavoriteCourses.findOne({ userId, isactive: true });
     if (!favorites) return errorResponse(res, "Favorites not found");
 
     favorites.items = [];
     await favorites.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites Course",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites Course cleared successfully`,
+    });
 
     return successResponse(res, "Favorites cleared", favorites);
   } catch (err) {
