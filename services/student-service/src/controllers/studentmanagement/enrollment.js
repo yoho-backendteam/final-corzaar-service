@@ -1,6 +1,7 @@
 import CartCourses from "../../models/cart/index.js";
 import Enrollment from "../../models/studentmanagment/Enrollment.js";
 import student_management from "../../models/studentmanagment/student_management.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 import { GetBatchData, GetBranchData, GetCourseDataForCart, GetPaymentById, GetUserData } from "../../utils/cart/index.js";
 import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
 import mongoose from "mongoose";
@@ -25,51 +26,62 @@ export const createOrderController = async (req, res) => {
     //   });
     // }
 
-    const cart = await CartCourses.findOne({_id:cartId})
+    const cart = await CartCourses.findOne({ _id: cartId })
     // const payment = await GetPaymentById(paymentId)
-    const student = await student_management.findOne({userId:user?._id})
+    const student = await student_management.findOne({ userId: user?._id })
 
-    const {data} = await GetCourseDataForCart({item:cart?.items})
-    
-    const output = {...cart._doc,items:data}
+    const { data } = await GetCourseDataForCart({ item: cart?.items })
+
+    const output = { ...cart._doc, items: data }
 
     let savedOrder;
 
-    output.items.forEach(async(data)=>{
+    output.items.forEach(async (data) => {
 
-        const enroll = {
-          userId:user?._id,
-          instituteId:data?.instituteId?._id,
-          items:{
-              courseId:data?._id,
-              title:data?.title,
-              price:data?.pricing?.price,
-              batchId:data?.batch?._id
-          },
-          pricing: {
-            subtotal: data?.pricing?.price,
-            discount: output?.coupon?.discountAmount,
-            tax: output?.pricing?.tax,
-            total: data?.pricing?.price,
-            currency:output?.pricing?.currency
-          },
-          payment: paymentId,
-          billing: {
-            firstName: student?.personalInfo?.firstName,
-            lastName: student?.personalInfo?.lastName,
-            email:student?.personalInfo?.email,
-            phone: student?.personalInfo?.phoneNumber,
-            address: student?.personalInfo?.address,
-          },
-        }
+      const enroll = {
+        userId: user?._id,
+        instituteId: data?.instituteId?._id,
+        items: {
+          courseId: data?._id,
+          title: data?.title,
+          price: data?.pricing?.price,
+          batchId: data?.batch?._id
+        },
+        pricing: {
+          subtotal: data?.pricing?.price,
+          discount: output?.coupon?.discountAmount,
+          tax: output?.pricing?.tax,
+          total: data?.pricing?.price,
+          currency: output?.pricing?.currency
+        },
+        payment: paymentId,
+        billing: {
+          firstName: student?.personalInfo?.firstName,
+          lastName: student?.personalInfo?.lastName,
+          email: student?.personalInfo?.email,
+          phone: student?.personalInfo?.phoneNumber,
+          address: student?.personalInfo?.address,
+        },
+      }
 
-        const newOrder = new Enrollment(enroll);
-        savedOrder = await newOrder.save();
+      const newOrder = new Enrollment(enroll);
+      savedOrder = await newOrder.save();
 
-        await CartCourses.findOneAndUpdate({_id:cartId},{checkout:true})
-  
+      await CartCourses.findOneAndUpdate({ _id: cartId }, { checkout: true })
+
     })
-      return res.status(201).json({
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Enrollment",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Order created successfully`,
+    });
+
+    return res.status(201).json({
       success: true,
       message: "Order created successfully",
       data: savedOrder,
@@ -90,7 +102,7 @@ export const createOrderController = async (req, res) => {
 const merchantHeader = (user) => ({
   headers: {
     user: JSON.stringify({
-      _id: user._id,          role: user.role,  
+      _id: user._id, role: user.role,
     }),
   },
 });
@@ -98,7 +110,7 @@ const merchantHeader = (user) => ({
 export const getAllOrdersController = async (req, res) => {
   const user = req.user;
   try {
-    
+
     const {
       userId,
       status,
@@ -115,28 +127,28 @@ export const getAllOrdersController = async (req, res) => {
     if (status) query.status = status;
     if (paymentStatus) query["payment.status"] = paymentStatus;
 
-    
+
     const skip = (Number(page) - 1) * Number(limit);
 
     const batchData = []
-    
+
     const orders = await Enrollment.find(query)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(Number(limit))
 
-      const batches= await Promise.all( orders.map(async (i) => {
-        let batch = await GetBatchData(i.items.courseId,i.items.batchId)
-        const userData = await GetUserData(i.userId)
-        const branches = await GetBranchData(merchantHeader(user))
-        const branch = branches?.data?.filter((j) => j._id === batch.courseId.branchId)
-        console.log("branc",branch);
-        batch = {...i.toObject(),batch,userData,branch}
-        batchData.push(batch)
-      }))
+    const batches = await Promise.all(orders.map(async (i) => {
+      let batch = await GetBatchData(i.items.courseId, i.items.batchId)
+      const userData = await GetUserData(i.userId)
+      const branches = await GetBranchData(merchantHeader(user))
+      const branch = branches?.data?.filter((j) => j._id === batch.courseId.branchId)
+      console.log("branc", branch);
+      batch = { ...i.toObject(), batch, userData, branch }
+      batchData.push(batch)
+    }))
 
-      // const user = http://localhost:3000/student/api/student_management/getbyid/691d8d28340440bf767c5b1d
-      // console.log(orders,"oooo")
+    // const user = http://localhost:3000/student/api/student_management/getbyid/691d8d28340440bf767c5b1d
+    // console.log(orders,"oooo")
     const totalOrders = await Enrollment.countDocuments(query);
 
     return res.status(200).json({
@@ -167,11 +179,11 @@ export const getAllOrdersController = async (req, res) => {
 export const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { page = 1, limit = 10 } = req.query; 
+    const { page = 1, limit = 10 } = req.query;
     const pageNum = Math.max(Number(page), 1);
     const limitNum = Math.max(Number(limit), 1);
 
-    
+
     const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { orderId: id };
 
     const order = await Enrollment.findOne(query);
@@ -183,7 +195,7 @@ export const getOrderById = async (req, res) => {
       });
     }
 
-    
+
     const totalItems = order.items.length;
     const startIndex = (pageNum - 1) * limitNum;
     const paginatedItems = order.items.slice(startIndex, startIndex + limitNum);
@@ -219,25 +231,36 @@ export const getOrderById = async (req, res) => {
 
 
 
-export const updateEnrollment = async(req,res)=>{
+export const updateEnrollment = async (req, res) => {
   try {
 
-    const {id} = req.params
-    const {status} = req.body
+    const { id } = req.params
+    const { status } = req.body
+    const user=req.user
 
-    const enrollment = await Enrollment.findByIdAndUpdate({_id:id}, {status}, {new: true})
-    if(!enrollment)  return res.status(404).json({
+    const enrollment = await Enrollment.findByIdAndUpdate({ _id: id }, { status }, { new: true })
+    if (!enrollment) return res.status(404).json({
       success: false,
       message: "Enrollment not found.",
-      
+
     })
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Enrollment",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Enrollment updated successfully`,
+    });
 
     res.status(200).json({
       success: true,
       message: "Enrollment updated successfully",
       data: enrollment
     })
-    
+
   } catch (error) {
     console.error("Error retrieving order:", error);
     res.status(500).json({

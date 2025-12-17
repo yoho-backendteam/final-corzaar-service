@@ -2,6 +2,7 @@ import axios from "axios";
 import PaymentTransaction from "../models/index.js";
 import { errorResponse, generateUUID, successResponse } from "../utils/index.js";
 import mongoose from "mongoose"
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const createPayment = async (req, res) => {
   try {
@@ -16,8 +17,8 @@ export const createPayment = async (req, res) => {
     const studentApiUrl = `${process.env.student_url}/api/student_management/getbyuserid/${user?._id}`;
     const cartApiUrl = `${process.env.student_url}/api/cart/getbyid/${cartId}`
     const studentResponse = await axios.get(studentApiUrl);
-    const cartResponse = await axios.get(cartApiUrl,{
-      headers:{user:JSON.stringify(req.user)}
+    const cartResponse = await axios.get(cartApiUrl, {
+      headers: { user: JSON.stringify(req.user) }
     })
     const student = studentResponse?.data?.data;
     const cart = cartResponse?.data?.data
@@ -37,6 +38,16 @@ export const createPayment = async (req, res) => {
       cartId,
     }
     const payment = new PaymentTransaction(data);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Payment Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student Payment created successfully`,
+    });
     await payment.save();
     const enrollresponse = await axios.post(`${process.env.student_url}/api/enrollment/create`, {
       cartId, paymentId: payment?._id
@@ -89,6 +100,7 @@ export const updatePayment = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+    const req = req.user
 
     const payment = await PaymentTransaction.findByIdAndUpdate(
       id,
@@ -96,6 +108,17 @@ export const updatePayment = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!payment) return errorResponse(res, "student not found", 404);
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Payment Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student Payment Updated successfully`,
+    });
     return successResponse(res, "transaction details updated  successfully", payment);
   } catch (error) {
     return errorResponse(res, error.message);
@@ -148,6 +171,7 @@ export const getByIDPayment = async (req, res) => {
 export const deletepaymentbyid = async (req, res) => {
   try {
     const { id } = req.params
+    const user = req.user
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
@@ -155,6 +179,16 @@ export const deletepaymentbyid = async (req, res) => {
     if (!deletedpayment) {
       return res.status(404).json({ message: "payment not found" })
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Payment Student",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Student Payment created successfully`,
+    });
 
     res.status(200).json({ message: "deleted payment", deletedpayment })
 
@@ -203,7 +237,7 @@ export const getallpayementfull = async (req, res) => {
           const studentResponse = await axios.get(studentApiUrl);
           const student = studentResponse?.data?.data || null;
           const StudentName = student?.fullName;
-          const studentEmail=student?.personalInfo?.email
+          const studentEmail = student?.personalInfo?.email
           return {
             ...payment.toObject(),
             StudentName,

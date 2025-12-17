@@ -1,4 +1,5 @@
 import { Course } from "../../models/coursemodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 // GET /api/courses/:id/content
 export const getCourseContent = async (req, res) => {
@@ -15,11 +16,23 @@ export const getCourseContent = async (req, res) => {
 export const addCourseContent = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
+    const user = req.user
     if (!course) return res.status(404).json({ message: "Course not found" });
 
     // Example: push new module
     course.content.modules.push(req.body);
     await course.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Content",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Content Created successfully`,
+    });
+
     res.status(201).json(course.content);
   } catch (err) {
     res.status(500).json({ message: "Error adding content", error: err.message });
@@ -30,6 +43,7 @@ export const addCourseContent = async (req, res) => {
 export const updateCourseContent = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
+    const user = req.user;
     if (!course) return res.status(404).json({ message: "Course not found" });
 
     const module = course.content.modules.id(req.params.contentId);
@@ -37,6 +51,16 @@ export const updateCourseContent = async (req, res) => {
 
     Object.assign(module, req.body);
     await course.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Content",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Content Update successfully`,
+    });
     res.json(module);
   } catch (err) {
     res.status(500).json({ message: "Error updating content", error: err.message });
@@ -47,6 +71,7 @@ export const updateCourseContent = async (req, res) => {
 export const deleteCourseContent = async (req, res) => {
   try {
     const { id, contentId } = req.params;
+    const user = req.user
     const course = await Course.findById(id);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
@@ -63,6 +88,16 @@ export const deleteCourseContent = async (req, res) => {
 
     // Save the course
     await course.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Content",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Content deleted successfully`,
+    });
 
     res.json({ message: "Module deleted successfully" });
   } catch (err) {

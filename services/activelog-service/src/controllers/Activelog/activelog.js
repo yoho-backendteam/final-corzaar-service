@@ -9,6 +9,7 @@ export const createActivityLog = async (req, res) => {
 
     const log = new ActivityLog(req.body);
     const savedLog = await log.save();
+    console.log("log",savedLog)
 
     res.status(201).json({
       Message: "Activity logged successfully",
@@ -95,7 +96,7 @@ export const deleteActivityLog = async (req, res) => {
 
 export const getAllActivityByRole = async (req, res) => {
   try {
-    const { role } = req.params; 
+    const { role } = req.params;
 
     const filter = role ? { actorRole: role } : {};
 

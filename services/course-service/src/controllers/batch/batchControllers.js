@@ -1,5 +1,6 @@
 import { Batch } from "../../models/batch/batchSchema.js"
 import { Course } from "../../models/coursemodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 import { GetInstituteByUserId } from "../../utils/axiosHelpers.js";
 import { createBatchValidation, updateBatchContentValidation, updateBatchSettingsValidation, updateBatchValidation } from "../../validations/batchValidation.js";
 
@@ -12,20 +13,30 @@ export const createBatch = async (req, res) => {
     try {
         const { error, value } = createBatchValidation.validate(req.body);
 
-        
+
         if (error) {
             return res.status(400).json({
                 status: false,
                 message: error.details[0].message
             });
         }
-        
+
         const { data } = await GetInstituteByUserId(user?._id)
-        console.log(data,"inst id")
+        console.log(data, "inst id")
 
         const checkId = await Course.findById(courseid)
         if (!checkId) return res.status(400).json({ message: "course not found" })
-        const create = new Batch({...value,merchantId:data?._id});
+        const create = new Batch({ ...value, merchantId: data?._id });
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Batch",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Batch created successfully`,
+        });
         await create.save()
         res.status(201).json({
             status: true,
@@ -70,8 +81,7 @@ export const getAllBatch = async (req, res) => {
 }
 
 //get batch by course
-export const 
-getBatchByCourse = async (req, res) => {
+export const getBatchByCourse = async (req, res) => {
     const { courseId } = req.params
     const { page, limit } = req.query
 
@@ -154,7 +164,7 @@ export const getBatchByBatchId = async (req, res) => {
 // update batch by course with batch id
 export const updateBatchByBatchId = async (req, res) => {
     const { courseid, batchid } = req.params
-
+    const user = req.user;
     try {
         const { error, value } = updateBatchValidation.validate(req.body);
         if (error) {
@@ -165,6 +175,16 @@ export const updateBatchByBatchId = async (req, res) => {
         }
         const checkId = await Batch.findOneAndUpdate({ courseId: courseid, _id: batchid }, value, { new: true }).populate([{ path: "courseId", model: "Course" }])
         // console.log("check", checkId)
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Batch",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} batch Updated successfully`,
+        });
         res.status(201).json({
             status: true,
             message: "Batch Updated successfully",
@@ -182,9 +202,20 @@ export const updateBatchByBatchId = async (req, res) => {
 // update batch by course with batch id
 export const deleteBatchByBatchId = async (req, res) => {
     const { courseid, batchid } = req.params
+    const user = req.user
 
     try {
         const checkId = await Batch.findOneAndDelete({ courseId: courseid, _id: batchid }, req.body, { new: true }).populate([{ path: "courseId", model: "Course" }])
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Batch",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Batch Deleted successfully`,
+        });
         res.status(201).json({
             status: true,
             message: "Batch Deleted successfully",
@@ -383,23 +414,23 @@ export const getallbatch = async (req, res) => {
 }
 
 export const getBatchByInstitute = async (req, res) => {
-  try {
-     const user = req.user 
-     const { data } = await GetInstituteByUserId(user?._id)
-     console.log("data",data,"eeee")
+    try {
+        const user = req.user
+        const { data } = await GetInstituteByUserId(user?._id)
+        console.log("data", data, "eeee")
 
-     const batches = await Batch.find({merchantId:data?._id,isdeleted:false})
+        const batches = await Batch.find({ merchantId: data?._id, isdeleted: false })
 
-     res.status(200).json({
+        res.status(200).json({
             status: true,
             message: "get all batch successfully",
             data: batches
-    })
-  } catch (error) {
-     res.status(500).json({
+        })
+    } catch (error) {
+        res.status(500).json({
             status: false,
             message: "Internal server error",
             error: error.message
         })
-  }
+    }
 };

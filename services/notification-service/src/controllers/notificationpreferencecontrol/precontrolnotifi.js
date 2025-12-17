@@ -1,9 +1,22 @@
 import NotificationPreference from "../../models/notificationpreference/preferencemodal.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 // import Institute from "../../../../merchant-service/institute/models/index.js";
 
 export const createPreference = async (req, res) => {
   try {
     const preference = await NotificationPreference.create(req.body);
+    const user = req.user
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Created successfully`,
+    });
+
     res.status(201).json({
       success: true,
       message: "Notification preference created successfully",
@@ -66,10 +79,21 @@ export const updatePreference = async (req, res) => {
       req.body,
       { new: true }
     ).populate("merchantId");
+    const user = req.user
 
     if (!updated) {
       return res.status(404).json({ success: false, message: "Preference not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Update successfully`,
+    });
 
     res.status(200).json({
       success: true,
@@ -86,10 +110,22 @@ export const deletePreference = async (req, res) => {
     const deleted = await NotificationPreference.findOneAndDelete({
       merchantId: req.params.merchantId,
     });
+    const user = req.user
 
     if (!deleted) {
       return res.status(404).json({ success: false, message: "Preference not found" });
     }
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Notification",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Notification Deleted successfully`,
+    });
 
     res.status(200).json({
       success: true,

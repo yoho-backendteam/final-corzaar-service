@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
 import { InstituteReviewMap } from "../../models/institutereviewmodel/institutereviewmaopmodel.js";
 import { InstituteReview } from "../../models/institutereviewmodel/institutereviewmodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 dotenv.config();
 
 export const createinstitutecontroll = async (req, res) => {
   try {
     const { instituteId, reviews } = req.body;
+    const user = req.user
 
     if (!instituteId || !Array.isArray(reviews) || reviews.length === 0) {
       return res.status(400).json({
@@ -25,6 +27,16 @@ export const createinstitutecontroll = async (req, res) => {
       { $push: { reviews: { $each: reviewIds } } },
       { new: true, upsert: true }
     ).populate("reviews");
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Institute review",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Institute review created successfully`,
+    });
 
     res.status(201).json({
       message: "Institute review(s) added and linked successfully",
@@ -78,7 +90,7 @@ export const getReviewsByInstituteId = async (req, res) => {
     const avgRating =
       instituteReviews.reviews.length > 0
         ? instituteReviews.reviews.reduce((sum, r) => sum + r.rating, 0) /
-          instituteReviews.reviews.length
+        instituteReviews.reviews.length
         : 0;
 
     res.status(200).json({
@@ -101,7 +113,7 @@ export const updateInstituteReview = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-
+    const user = req.user
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({
         message: "Invalid review ID format",
@@ -120,6 +132,16 @@ export const updateInstituteReview = async (req, res) => {
         success: false,
       });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Institute review",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Institute review updated successfully`,
+    });
 
     res.status(200).json({
       message: "Institute review updated successfully",
@@ -138,6 +160,7 @@ export const updateInstituteReview = async (req, res) => {
 export const deleteInstituteReview = async (req, res) => {
   try {
     const { id } = req.params;
+    const user = req.user
 
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({
@@ -158,6 +181,16 @@ export const deleteInstituteReview = async (req, res) => {
       { reviews: id },
       { $pull: { reviews: id } }
     );
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Institute review",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Institute review deleted successfully`,
+    });
 
     res.status(200).json({
       message: "Institute review deleted successfully",

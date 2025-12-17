@@ -1,10 +1,11 @@
 import { CourseReviewMap } from "../../models/coursereviewmodel/coursereviewmapmodel.js";
 import { CourseReview } from "../../models/coursereviewmodel/coursereviewmodel.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const createcoursereview = async (req, res) => {
     try {
         const { courseId, reviews } = req.body;
-
+        const user = req.user
         if (!courseId || !Array.isArray(reviews) || reviews.length === 0) {
             return res.status(400).json({
                 message: "courseId and at least one review are required",
@@ -20,6 +21,16 @@ export const createcoursereview = async (req, res) => {
             { $push: { reviews: { $each: reviewIds } } },
             { new: true, upsert: true }
         ).populate("reviews");
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Course review",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Course review created successfully`,
+        });
 
         res.status(201).json({
             message: "Course review(s) added and linked successfully",
@@ -97,7 +108,7 @@ export const updateCourseReview = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-
+        const user = req.user
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({
                 message: "Invalid review ID format",
@@ -117,6 +128,16 @@ export const updateCourseReview = async (req, res) => {
             });
         }
 
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Course review",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Course review updated successfully`,
+        });
         res.status(200).json({
             message: "Course review updated successfully",
             success: true,
@@ -134,6 +155,7 @@ export const updateCourseReview = async (req, res) => {
 export const deleteCourseReview = async (req, res) => {
     try {
         const { id } = req.params;
+        const user = req.user
 
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({
@@ -154,7 +176,16 @@ export const deleteCourseReview = async (req, res) => {
             { reviews: id },
             { $pull: { reviews: id } }
         );
-
+        logActivity({
+            userid: user._id.toString(),
+            actorRole: user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "",
+            action: "Course review",
+            description: `${user?.role
+                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                : "User"} Course review deleted successfully`,
+        });
         res.status(200).json({
             message: "Course review deleted successfully",
             success: true,

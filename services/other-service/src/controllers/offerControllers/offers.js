@@ -4,24 +4,35 @@ import { offerUpdateValidation, offerValidation } from "../../validations/offerV
 import axios from "axios";
 
 // get Course by Id
-const getCourseById = async(url) => {
-    try {
-    
-        const response = await axios.get(url);
-        return response
-    } catch (error) {
-        console.log(error);
-    }
+const getCourseById = async (url) => {
+  try {
+
+    const response = await axios.get(url);
+    return response
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 // Create Offer
 export const createOffer = async (req, res) => {
+  const user = req.user
   try {
     const { error } = offerValidation.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     req.body.uuid = generateUUID();
     const offer = await Offer.create(req.body);
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "offers",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Offer Created successfully`,
+    });
     res.status(201).json(offer);
   } catch (err) {
     console.error(err);
@@ -32,7 +43,7 @@ export const createOffer = async (req, res) => {
 // Get All Offers
 export const getOffers = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;  
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
     const skip = (page - 1) * limit
@@ -40,7 +51,7 @@ export const getOffers = async (req, res) => {
     const totalOffers = await Offer.countDocuments();
 
     res.status(200).json({
-      status : "Success",
+      status: "Success",
       message: "offer data successfully fetched",
       currentPage: page,
       totalPages: Math.ceil(totalOffers / limit),
@@ -60,7 +71,7 @@ export const getOfferById = async (req, res) => {
     if (!offer) return res.status(404).json({ message: "Offer not found" });
     const data = await getCourseById(`http://localhost:3001/api/courses/getCourseById/${offer.courseId}`)
     const courseData = data.data;
-    res.status(200).json({data : {offer,courseData}});
+    res.status(200).json({ data: { offer, courseData } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -70,6 +81,7 @@ export const getOfferById = async (req, res) => {
 export const updateOffer = async (req, res) => {
   const { id } = req.params;
 
+  const user = req.user
   try {
     const { error } = offerUpdateValidation.validate(req.body);
     if (error)
@@ -87,6 +99,17 @@ export const updateOffer = async (req, res) => {
     if (!offer)
       return res.status(404).json({ message: "Offer not found" });
 
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "offers",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Offer Updated successfully`,
+    });
+
     res.status(200).json({
       status: true,
       message: "Offer updated successfully",
@@ -99,10 +122,21 @@ export const updateOffer = async (req, res) => {
 
 // Delete Offer
 export const deleteOffer = async (req, res) => {
-    const {id} = req.params
+  const { id } = req.params
   try {
     const offer = await Offer.findByIdAndDelete(id);
     if (!offer) return res.status(404).json({ message: "Offer not found" });
+
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "offers",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Offer delete successfully`,
+    });
     res.status(200).json({ message: "Offer deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -113,7 +147,8 @@ export const deleteOffer = async (req, res) => {
 
 export const statusUpdate = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; 
+  const { status } = req.body;
+  const user = req.user
 
   try {
     if (!status) {
@@ -129,6 +164,16 @@ export const statusUpdate = async (req, res) => {
     if (!updatedOffer) {
       return res.status(404).json({ status: false, message: "Offer not found" });
     }
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "offers",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Status Updated successfully`,
+    });
 
     res.status(200).json({
       status: true,

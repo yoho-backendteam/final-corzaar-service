@@ -15,10 +15,6 @@ const uploadToCloudinary = (fileBuffer, resourceType) => {
   });
 };
 
-
-
-
-
 export const uploadFile = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -26,7 +22,7 @@ export const uploadFile = async (req, res) => {
     const { mimetype, size, originalname, buffer } = req.file;
     const type = mimetype.startsWith("image") ? "image" : "video";
 
-   
+
     if (type === "image" && size > 1 * 1024 * 1024)
       return res.status(400).json({ error: "Image must be ≤ 1MB" });
     if (type === "video" && size > 20 * 1024 * 1024)
@@ -62,7 +58,7 @@ export const getAllFiles = async (req, res) => {
 
     const filesWithLink = files.map(file => ({
       ...file._doc,
-      fileLink: `filelink/${file._id}`, 
+      fileLink: `filelink/${file._id}`,
     }));
 
     res.json(filesWithLink);
@@ -94,10 +90,6 @@ export const getFileById = async (req, res) => {
 
 
 
-
-
-
-
 export const updateFile = async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
@@ -122,12 +114,6 @@ export const updateFile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-
-
-
 
 
 

@@ -1,30 +1,31 @@
 import axios from "axios";
-import  {  OrderModel } from "../../models/cartmodel/index.js";
+import { OrderModel } from "../../models/cartmodel/index.js";
 import CartCourses from "../../models/cart/index.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 
-const getData = async(url) => {
-    try {
-        const response = await axios.get(url)
-        return response?.data
-    } catch (error) {
-        console.log(error)
-    }
+const getData = async (url) => {
+  try {
+    const response = await axios.get(url)
+    return response?.data
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 export const checkoutAllCart = async (req, res) => {
   try {
     const user = req.user;
-    const {cartId} = req.params;
-    
-    const cart = await CartCourses.findOne({_id:cartId,userId:user?._id, checkout:false});
+    const { cartId } = req.params;
+
+    const cart = await CartCourses.findOne({ _id: cartId, userId: user?._id, checkout: false });
 
     if (!cart) return errorResponse(res, "No active cart found for this user");
-    
-    const {data} = await GetCourseDataForCart({item:cart?.items})
-    
-    const output = {...cart._doc,items:data}
-    
+
+    const { data } = await GetCourseDataForCart({ item: cart?.items })
+
+    const output = { ...cart._doc, items: data }
+
 
     if (!cart) {
       return res.status(400).json({ message: "No active items in cart" });
@@ -47,6 +48,16 @@ export const checkoutAllCart = async (req, res) => {
 
     order.status = "confirmed";
     await order.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Checked out ",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} checked out successfully`,
+    });
 
     return res.status(200).json({
       message: "All cart items checked out successfully",
@@ -81,7 +92,18 @@ export const checkoutSingleCartItem = async (req, res) => {
       totalAmount: cart.items.reduce((sum, item) => sum + item.price, 0),
     });
 
-    await CartCourses.findByIdAndDelete(cartID); 
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: " Checked out ",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} checked out successfully`,
+    });
+
+    await CartCourses.findByIdAndDelete(cartID);
 
     return res.status(200).json({
       message: "Single cart item checked out successfully",
@@ -96,6 +118,7 @@ export const checkoutSingleCartItem = async (req, res) => {
 export const checkoutDirectCourse = async (req, res) => {
   try {
     const { userId, courseId } = req.body;
+    const user = req.user
 
     if (!userId || !courseId)
       return res.status(400).json({ message: "userId and courseId required" });
@@ -113,6 +136,17 @@ export const checkoutDirectCourse = async (req, res) => {
       items: [{ courseId, price }],
       totalAmount: price,
     });
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Course purchased",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Course purchased successfully`,
+    });
+
 
     return res.status(200).json({
       success: true,

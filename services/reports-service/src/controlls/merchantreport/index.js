@@ -2,10 +2,11 @@
 import { v4 as uuidv4 } from "uuid";
 import { ticketModel } from "../../models/merchantreport/reportmodel.js";
 import { ticketValidationSchema } from "../../validation/ticketvalidation.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const createTicket = async (req, res) => {
   try {
-   
+    const user = req.user
     const { error } = ticketValidationSchema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
@@ -26,6 +27,16 @@ export const createTicket = async (req, res) => {
     });
 
     await newTicket.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Ticket",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"}  Ticket created successfully`,
+    });
 
     res.status(201).json({
       success: true,
@@ -83,7 +94,7 @@ export const getTicketById = async (req, res) => {
 
     const ticket = await ticketModel
       .findOne({ $or: [{ _id: id }, { ticketId: id }] })
-    
+
 
     if (!ticket) {
       return res.status(404).json({
@@ -110,6 +121,7 @@ export const updateTicket = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, actionTaken } = req.body;
+    const user = req.user
 
     const updatedTicket = await ticketModel.findByIdAndUpdate(
       id,
@@ -124,9 +136,18 @@ export const updateTicket = async (req, res) => {
         message: "Ticket not found",
       });
     }
-
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Ticket",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Ticket updated successfully`,
+    });
     res.status(200).json({
-      status: "success", // ✅ Added for frontend check
+      status: "success",
       success: true,
       message: "Ticket updated successfully",
       data: updatedTicket,
@@ -146,13 +167,23 @@ export const updateTicket = async (req, res) => {
 export const deleteTicket = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const user = req.user
     const deletedTicket = await ticketModel.findByIdAndDelete(id);
     if (!deletedTicket)
       return res.status(404).json({ message: "Ticket not found" });
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Ticket",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Ticket updated successfully`,
+    });
 
-    res.status(200).json({   success: true,message: "Ticket deleted successfully" });
+    res.status(200).json({ success: true, message: "Ticket deleted successfully" });
   } catch (error) {
-    res.status(500).json({  success: false, message: "Error deleting ticket", error: error.message });
+    res.status(500).json({ success: false, message: "Error deleting ticket", error: error.message });
   }
 };

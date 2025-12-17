@@ -3,10 +3,12 @@ import axios from "axios";
 import { successResponse, errorResponse } from "../../utils/index.js";
 import { calculateTotals } from "../../utils/index.js";
 import CartCourses from "../../model/cart/index.js";
+import { logActivity } from "../utils/ActivitylogHelper.js";
 
 export const addToCart = async (req, res) => {
   try {
     const { userId, courseId, title, price, discount, instituteId, payment, } = req.body;
+    const user = req.user
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return errorResponse(res, "Invalid userId format");
     }
@@ -63,6 +65,16 @@ export const addToCart = async (req, res) => {
       instituteId,
     });
     await cart.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Carts",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Item added to cart successfully`,
+    });
     return successResponse(res, "Item added to cart", cart);
   } catch (err) {
     return errorResponse(res, err.message || "Server error");
@@ -75,7 +87,7 @@ export const getCart = async (req, res) => {
 
     if (!userId) return errorResponse(res, "userId is required");
 
-  
+
     userId = userId.trim();
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return errorResponse(res, "Invalid userId format");
@@ -99,6 +111,7 @@ export const removeItem = async (req, res) => {
   try {
     const { userId } = req.body; // comes from validator
     const { id: courseId } = req.params;
+    const user = req.user
 
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(courseId)) {
       return errorResponse(res, "Invalid userId or courseId format");
@@ -107,7 +120,7 @@ export const removeItem = async (req, res) => {
     const cart = await CartCourses.findOne({ userId, isactive: true, isdeleted: false });
     if (!cart) return errorResponse(res, "Cart not found");
 
-   
+
     const itemIndex = cart.items.findIndex(
       (item) => item.courseId.toString() === courseId.toString()
     );
@@ -125,6 +138,16 @@ export const removeItem = async (req, res) => {
     }
 
     await cart.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Carts",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Item removed from cart successfully`,
+    });
 
     return successResponse(res, "Item removed from cart", cart);
   } catch (err) {
@@ -136,6 +159,7 @@ export const removeItem = async (req, res) => {
 export const clearCart = async (req, res) => {
   try {
     let { userId } = req.body;
+    const user = req.user
     if (!userId) return errorResponse(res, "userId is required");
 
     userId = userId.trim();
@@ -148,6 +172,17 @@ export const clearCart = async (req, res) => {
     cart.items = [];
     cart.pricing = calculateTotals([], null);
     await cart.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Carts",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Item Cart cleared successfully`,
+    });
+
 
     return successResponse(res, "Cart cleared successfully", cart);
   } catch (err) {

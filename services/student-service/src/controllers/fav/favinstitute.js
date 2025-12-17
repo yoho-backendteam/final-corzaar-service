@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 import InstituteFavorites from "../../models/fav/favinstitute.js";
 import { successResponse, errorResponse } from "../../utils/index.js";
+import { logActivity } from "../../utils/ActivitylogHelper.js";
 
 export const addInstituteFav = async (req, res) => {
   try {
     const { userId, instituteId } = req.body;
-
+    const user = req.user
     // Check if already exists
     const existingFav = await InstituteFavorites.findOne({
       userId,
@@ -20,6 +21,17 @@ export const addInstituteFav = async (req, res) => {
     // Create new favorite
     const newFav = new InstituteFavorites({ userId, instituteId });
     await newFav.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites Institute",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites successfully`,
+    });
+
 
     res.status(201).json({ message: "Institute added to favorites", data: newFav });
   } catch (error) {
@@ -54,6 +66,7 @@ export const removeInstituteFav = async (req, res) => {
   try {
     const { userId } = req.body;
     const { instituteId } = req.params;
+    const user = req.user
 
     if (!userId || !instituteId) {
       return errorResponse(res, "userId and instituteId are required");
@@ -77,10 +90,20 @@ export const removeInstituteFav = async (req, res) => {
     fav.isdeleted = true;
     fav.isactive = false;
     await fav.save();
+    logActivity({
+      userid: user._id.toString(),
+      actorRole: user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "",
+      action: "Favorites",
+      description: `${user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User"} Favorites Removed successfully`,
+    });
 
     return successResponse(res, "Institute removed from favorites", fav.toObject());
   } catch (err) {
-   
+
     return errorResponse(res, err.message);
   }
 };

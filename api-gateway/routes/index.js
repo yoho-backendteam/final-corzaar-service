@@ -59,7 +59,9 @@ routes.use("/payment",AuthVerify,createProxyMiddleware({
     timeout:10000,
 }))
 
-routes.use("/logs",AuthVerify,createProxyMiddleware({
+routes.use("/logs",
+    AuthVerify,
+    createProxyMiddleware({
     target:process.env.activity_url,
     changeOrigin:true,
      agent,
