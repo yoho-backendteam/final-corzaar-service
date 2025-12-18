@@ -1,0 +1,99 @@
+version: "1.0.1"
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
+      - merchant-service
+      - student-service
+      - course-service
+      - payment-service
+      - other-service
+      - notification-service
+      - activelog-service
+      - content-service
+      - reviews-service
+      - reports-service
+  
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+  
+  merchant-service:
+    build:
+      context: ./services/merchant-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+  
+  student-service:
+    build:
+      context: ./services/student-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    
+  course-service:
+    build:
+      context: ./services/course-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+  
+  other-service:
+    build:
+      context: ./services/other-service
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3006"
+  
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "3007:3007"
+  
+  activelog-service:
+    build:
+      context: ./services/activelog-service
+      dockerfile: Dockerfile
+    ports:
+      - "3008:3008"
+  
+  content-service:
+    build:
+      context: ./services/content-service
+      dockerfile: Dockerfile
+    ports:
+      - "3009:3009"
+  
+  reviews-service:
+    build:
+      context: ./services/reviews-service
+      dockerfile: Dockerfile
+    ports:
+      - "3010:3010"
+  
+  reports-service:
+    build:
+      context: ./services/reports-service
+      dockerfile: Dockerfile
+    ports:
+      - "3011:3011"
+  
