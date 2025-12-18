@@ -3,21 +3,21 @@ import dotenv from "@dotenvx/dotenvx"
 dotenv.config()
 
 export const GetInstituteByUserId=async(id)=>{
-    const response = await axios.get(`http://localhost:${process.env.merchant_service_url}/api/getbyuserId/${id}`).catch((err)=>{
+    const response = await axios.get(`${process.env.merchant_url}/api/getbyuserId/${id}`).catch((err)=>{
         console.log(err)
     })
     return response?.data;
 }
 
 export const GetUserData=async(id)=>{
-    const response = await axios.get(`http://localhost:${process.env.student_service_url}/api/student_management/getbyid/${id}`).catch((err)=>{
+    const response = await axios.get(`${process.env.student_url}/api/student_management/getbyid/${id}`).catch((err)=>{
         console.log(err)
     })
     return response?.data;
 }
 
 export const GetBranchData=async(option = {})=>{
-    const response = await axios.get(`http://localhost:${process.env.merchant_service_url}/api/branch/byinstitute`,
+    const response = await axios.get(`${process.env.merchant_url}/api/branch/byinstitute`,
       {
       ...option,
     }).catch((err)=>{
