@@ -1,4 +1,4 @@
-import { GetInstituteByUserId } from "../../utils/helper.js/"
+import { GetInstituteByUserId } from "../../utils/helper.js"
 import Query from "../../models/Query/query_schema.js"
 // import { GetInstituteByUserId } from "../../utils/helper.js"""
 import { queryValidationSchema, queryReceiveSchema } from "../../validation/Query/query.js";

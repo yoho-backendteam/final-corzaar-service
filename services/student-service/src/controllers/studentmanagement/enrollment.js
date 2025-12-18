@@ -141,7 +141,7 @@ export const getAllOrdersController = async (req, res) => {
       let batch = await GetBatchData(i.items.courseId, i.items.batchId)
       const userData = await GetUserData(i.userId)
       const branches = await GetBranchData(merchantHeader(user))
-      const branch = branches?.data?.filter((j) => j._id === batch.courseId.branchId)
+      const branch = branches?.data?.filter((j) => j._id === batch?.courseId?.branchId)
       console.log("branc", branch);
       batch = { ...i.toObject(), batch, userData, branch }
       batchData.push(batch)

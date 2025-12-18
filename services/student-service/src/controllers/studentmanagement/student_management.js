@@ -97,27 +97,12 @@ export const getEnrolledStudents = async (req, res) => {
 
     const insId = await GetInstituteByUserId(Id)
     const merchantId = insId?.data?._id
-    console.log("insId", merchantId)
 
-    // 1️⃣ Verify merchant using findOne
-    // const merchant = await Institute.findOne({ _id: merchantId });
-    // if (!merchant) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: "Merchant not found or unauthorized",
-    //   });
-    // }
-
-    // 2️⃣ Fetch all students available in DB
-    const students = await Enrollment.find()
+    const students = await Enrollment.find({instituteId:merchantId,status:"confirmed"})
 
     const filtered = []
-    const confirmEnrollment = students.filter(item =>
-      item.status === "confirmed" &&
-      item.instituteId?.toString() === merchantId.toString()
-    );
 
-    const batches = await Promise.all(confirmEnrollment.map(async (i) => {
+    const batches = await Promise.all(students.map(async (i) => {
       let batch = await GetBatchData(i.items.courseId, i.items.batchId)
       batch = { ...i.toObject(), batch }
       filtered.push(batch)
@@ -131,12 +116,6 @@ export const getEnrolledStudents = async (req, res) => {
       });
     }
 
-    // 3️⃣ Filter students that belong to this merchant/institute
-    // const enrolledStudents = students.filter(
-    //   (stu) => stu.instituteId?.toString() === merchantId.toString()
-    // );
-
-    // 4️⃣ Return merchant-specific students only
     return res.status(200).json({
       success: true,
       message: "Fetched students successfully",
