@@ -93,12 +93,17 @@ export const getAllStudents = async (req, res) => {
 export const getEnrolledStudents = async (req, res) => {
   try {
     const Id = req.user._id;
-    console.log("mervh", Id)
+
+    console.log("merchant ids", Id)
 
     const insId = await GetInstituteByUserId(Id)
     const merchantId = insId?.data?._id
+    
+    console.log(merchantId,"institute ids")
 
     const students = await Enrollment.find({instituteId:merchantId,status:"confirmed"})
+
+    console.log(students,"students get all")
 
     const filtered = []
 
