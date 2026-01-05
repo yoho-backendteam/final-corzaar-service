@@ -45,13 +45,6 @@ export const uploadFile = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-
 export const getAllFiles = async (req, res) => {
   try {
     const files = await File.find({ isDelete: false }).sort({ createdAt: -1 });

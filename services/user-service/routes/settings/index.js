@@ -9,7 +9,7 @@ settingRouter.get("/getprofile",getProfile);
 settingRouter.put("/updateprofile/:id",updateProfile)
 settingRouter.post("/createconfig",createSystemConfig);
 settingRouter.get("/getconfig", getSystemConfig);
-settingRouter.put("/updateconfig", updateSystemConfig);
+settingRouter.put("/updateconfig/:id", updateSystemConfig);
 settingRouter.get("/getnotify",getNotificationSettings);
 settingRouter.put("/updatenotify", updateNotificationSettings);
 settingRouter.put("/updatepassword", ChangeAdminPassword);

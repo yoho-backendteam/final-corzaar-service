@@ -4,7 +4,11 @@ import { logActivity } from "../../utils/ActivitylogHelper.js";
 export const getNotificationSettings = async (req, res) => {
   try {
     const settings = await NotificationSettings.findOne();
-    res.json(settings);
+    res.status(200).json({
+      message: "setting prefrence got successfully ",
+      data: settings,
+      success: true
+  });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -24,7 +28,11 @@ export const updateNotificationSettings = async (req, res) => {
         ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
         : "User"} Notification Setting Updated successfully`,
     });
-    res.json(updated);
+    res.status(200).json({
+      message: "setting preference updated successfully",
+      data: updated,
+      success: true
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
