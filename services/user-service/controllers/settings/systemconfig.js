@@ -5,6 +5,11 @@ import { logActivity } from "../../utils/ActivitylogHelper.js";
 export const getSystemConfig = async (req, res) => {
   try {
     const config = await SystemConfig.findOne();
+    res.status(200).json({
+      message: "Successfully got system config",
+      data: config,
+      success: true
+    })
     res.json(config);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -40,7 +45,10 @@ export const createSystemConfig = async (req, res) => {
 
 export const updateSystemConfig = async (req, res) => {
   try {
-    const updated = await SystemConfig.findOneAndUpdate({}, req.body, { new: true });
+    const { id } = req.params
+    const user = req.user
+    const updated = await SystemConfig.findByIdAndUpdate(id, req.body, { new: true });
+    console.log(updated,"ipda=")
     logActivity({
       userid: user._id.toString(),
       actorRole: user?.role
@@ -51,7 +59,11 @@ export const updateSystemConfig = async (req, res) => {
         ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
         : "User"} system config Updatedsuccessfully`,
     });
-    res.json(updated);
+    res.status(200).json({
+      message: "Successfully updated system config",
+      data: updated,
+      success: true
+    })
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
