@@ -14,7 +14,7 @@ import { PermissionVerify } from "../../middleware/index.js";
 const offerRouter = express.Router();
 
 offerRouter.post("/",PermissionVerify(["merchant"]), createOffer);
-offerRouter.get("/",PermissionVerify(["open","merchant","admin"]), getOffers);
+offerRouter.get("/all",PermissionVerify(["open","merchant","admin"]), getOffers);
 offerRouter.put("/status/:id",PermissionVerify(["admin"]),statusUpdate)
 offerRouter.get("/:id", getOfferById);
 offerRouter.put("/:id",
