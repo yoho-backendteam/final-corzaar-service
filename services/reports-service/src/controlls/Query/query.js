@@ -136,7 +136,7 @@ const adminqueryreply = async (req, res) => {
     await queryDoc.save();
 
     logActivity({
-      userid: user._id.toString(),
+      userid: user?._id?.toString(),
       actorRole: user?.role
         ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
         : "",

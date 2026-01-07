@@ -100,16 +100,16 @@ export const updateOffer = async (req, res) => {
     if (!offer)
       return res.status(404).json({ message: "Offer not found" });
 
-    logActivity({
-      userid: user._id.toString(),
-      actorRole: user?.role
-        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
-        : "",
-      action: "offers",
-      description: `${user?.role
-        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
-        : "User"} Offer Updated successfully`,
-    });
+    // logActivity({
+    //   userid: user._id.toString(),
+    //   actorRole: user?.role
+    //     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+    //     : "",
+    //   action: "offers",
+    //   description: `${user?.role
+    //     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+    //     : "User"} Offer Updated successfully`,
+    // });
 
     res.status(200).json({
       status: true,

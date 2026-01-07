@@ -93,7 +93,7 @@ export const getAdminDashboardData = async (req, res) => {
     ).length;
 
     const recentTransactions = Spayments
-      .filter((p) => p.createdAt && p.status?.toLowerCase() === "completed")
+      .filter((p) => p.createdAt)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 10)
       .map((p) => ({
