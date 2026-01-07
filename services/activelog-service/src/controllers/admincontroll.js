@@ -45,7 +45,6 @@ export const getAdminDashboardData = async (req, res) => {
       safeFetch(req, `${process.env.activity_url}${process.env.ACTIVITY_API}`.replace(":role", "Admin"), "Activity API"),
     ]);
 
-
     const studentRevenue = Spayments
       ?.filter((p) => p)
       .reduce((sum, p) => sum + Number(p.amount || 0), 0);
@@ -60,12 +59,14 @@ export const getAdminDashboardData = async (req, res) => {
     const totalRevenue = adminCommission;
     const revenueByDate = {};
 
+    console.log(Spayments)
+
     Spayments.filter((p) => p).forEach(
       (p) => {
         const date = new Date(p.createdAt);
         date.setUTCHours(0, 0, 0, 0);
         const dateKey = date.toISOString();
-        revenueByDate[dateKey] = (revenueByDate[dateKey] || 0);
+        revenueByDate[dateKey] = (p.amount);
       }
     );
 

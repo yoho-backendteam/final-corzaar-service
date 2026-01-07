@@ -175,7 +175,7 @@ export const updateInstitute = async (req, res) => {
 export const getInstitutes = async (req, res) => {
   try {
 
-    const {type} = req.query
+    const {type = 'all'} = req.query
     let institutes;
     if (type === 'all') {
       institutes = await Institute.find({ isdeleted: false});
