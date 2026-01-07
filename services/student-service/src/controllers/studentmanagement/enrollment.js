@@ -270,3 +270,32 @@ export const updateEnrollment = async (req, res) => {
     });
   }
 }
+export const getEnrollmentByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const enrollments = await Enrollment.find({ userId })
+      .sort({ createdAt: -1 });
+
+    if (!enrollments || enrollments.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No courses found for this user",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: enrollments,
+    });
+
+  } catch (error) {
+    console.error("Error fetching enrollments by userId:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};

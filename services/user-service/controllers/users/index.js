@@ -4,6 +4,7 @@ import { UserModel } from "../../models/usermodel.js"
 import bcrypt from "bcrypt"
 import { logActivity } from "../../utils/ActivitylogHelper.js"
 
+
 export const UsersMobileRegister = async (req, res) => {
     try {
         const { phoneNumber } = req.body
@@ -88,16 +89,34 @@ export const GetUserProfile = async (req, res) => {
     }
 }
 
-export const GetUserProfileById = async (req, res) => {
-    try {
-        const { id } = req.params
-        const user = await UserModel.findOne({ _id: id }).select("-password")
+export const getProfileById = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id).lean();
 
-        res.status(200).json({ status: true, message: "profile data fetched", user })
-    } catch (error) {
-        res.status(500).json({ status: false, message: error.message })
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found" });
     }
-}
+
+    res.status(200).json({
+      status: true,
+      data: {
+        fullName: user.fullName,
+        email: user.email,
+        personalInfo: {
+          address: {
+            current: {
+              city: user.address?.current?.city || "",
+              country: user.address?.current?.country || "",
+            },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 
 export const UpdateProfileComplted = async (req, res) => {
     try {
@@ -123,3 +142,23 @@ export const UpdateProfileComplted = async (req, res) => {
         res.status(500).json({ status: false, message: error.message })
     }
 }
+export const getActivityByUser = async (req, res) => {
+  try {
+    const activities = await logActivity.find({
+      userId: req.params.id,
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      status: true,
+      Data: activities.map(item => ({
+        _id: item._id,
+        description: item.description,
+        createdAt: item.createdAt,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};

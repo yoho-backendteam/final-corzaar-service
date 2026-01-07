@@ -170,7 +170,7 @@ export const getStudentByUserId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const student = await student_management.findOne({ userId: id });
+    const student = await student_management.findOne({ userId: id.toString() });
 
     if (!student) {
       return res.status(404).json({
