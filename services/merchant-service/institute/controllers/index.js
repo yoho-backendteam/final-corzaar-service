@@ -174,7 +174,14 @@ export const updateInstitute = async (req, res) => {
 
 export const getInstitutes = async (req, res) => {
   try {
-    const institutes = await Institute.find({ isdeleted: false });
+
+    const {type} = req.query
+    let institutes;
+    if (type === 'all') {
+      institutes = await Institute.find({ isdeleted: false});
+    }else{
+      institutes = await Institute.find({ isdeleted: false , status:'pending' });
+    }
 
     return successResponse(res, "Institutes fetched successfully", institutes);
   } catch (error) {

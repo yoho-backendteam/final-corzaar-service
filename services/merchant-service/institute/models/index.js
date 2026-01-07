@@ -129,8 +129,8 @@ const InstituteSchema = new Schema(
     isdeleted:{ type: Boolean, default: false },
     status: {
       type: String,
-      enum: ["active", "blocked", "suspended"],
-      default: "active",
+      enum: ["pending","active", "blocked", "suspended"],
+      default: "pending",
     },
 
   },
