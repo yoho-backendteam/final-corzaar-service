@@ -50,19 +50,24 @@ export const getDashboardData = async (req, res) => {
 
     const studentsResponse = await safeCall(
       "students",
-      getData(`${process.env.merchant_url}/api/getall`)
+      getData(`${process.env.student_url}/api/student_management/getall`, merchantHeader(user))
     );
 
     const notificationResponse = await safeCall(
       "notifications",
-      getData(`${process.env.payment_url}/api?type=merchant`)
+      getData(`${process.env.notification_url}/api?type=merchant`)
+    );
+
+    const revenueResponse = await safeCall(
+      "revenue",
+      getData(`${process.env.payment_url}/api/institute/getall`)
     );
 
     const recentResponse = await safeCall(
       "enrollments",
       getData(`${process.env.student_url}/api/enrollment/getall`, merchantHeader(user))
     );
-    // console.log("recenmt",recentResponse,"rrrrrrrrrrr")
+    console.log("recenmt",recentResponse,"r enri")
 
     const batchResponse = await safeCall(
       "batches",
@@ -76,6 +81,7 @@ export const getDashboardData = async (req, res) => {
     const students = studentsResponse?.data || [];
     const notifications = notificationResponse?.data || [];
     const enrollments = recentResponse?.data || [];
+    const revenues = revenueResponse?.data || []
 
     const batches = Array.isArray(batchResponse?.data)
       ? batchResponse.data
@@ -97,6 +103,7 @@ export const getDashboardData = async (req, res) => {
         date: enroll.createdAt,
         amount: enroll.pricing.total,
         status: enroll.status || "Pending",
+        items: enroll.items || []
       }));
 
     const topCourses = [...activeCourses]
@@ -148,6 +155,7 @@ export const getDashboardData = async (req, res) => {
       topCourses,
       recentNotifications,
       recentEnrollments,
+      revenues,
       recentBatches,
     });
   } catch (error) {

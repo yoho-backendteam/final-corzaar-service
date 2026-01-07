@@ -6,7 +6,8 @@ export const GetInstituteByUserId=async(id)=>{
     const response = await axios.get(`http://localhost:${process.env.merchant_service_url}/api/getbyuserId/${id}`).catch((err)=>{
         console.log(err)
     })
-    return response.data
+    console.log(response,"ress")
+    return response?.data
 }
 
 export const getData = async(url) => {
