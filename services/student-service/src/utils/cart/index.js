@@ -98,3 +98,59 @@ export const GetBatchData=async(courseId,batchId)=>{
 
   return res
 }
+
+const sanitizeBatchPayload = (batch) => {
+  const allowedPayload = {
+    merchantId: batch.merchantId,
+    // batchId: batch.batchId,
+    // uuid: batch.uuid,
+    courseId: batch.courseId,
+    batchName: batch.batchName,
+    // batchCode: batch.batchCode,
+    studentId: batch.studentId,
+    seatsAvailable: batch.seatsAvailable,
+    seatsFilled: batch.seatsFilled,
+    totalSeats: batch.totalSeats,
+    students: batch.students,
+    schedule: batch.schedule,
+  };
+
+  return allowedPayload;
+};
+
+
+export const UpdateBatchData = async (courseId, batchId, userId) => {
+  try {
+    const batch = await GetBatchData(courseId, batchId);
+    if (!batch) throw new Error("Batch not found");
+
+    const students = (batch.students || []).map(id => id);
+    if (!students.includes(userId)) {
+      students.push(userId);
+    }
+
+    const payload = sanitizeBatchPayload({
+      ...batch,
+      students,
+    });
+
+    const res = await axios.put(
+      `${process.env.course_url}/api/course/${courseId}/batch/${batchId}`,
+      payload,
+      {
+        headers: {
+          user: JSON.stringify({ role: "merchant" }),
+        },
+      }
+    );
+
+    return res.data;
+  } catch (err) {
+    console.error(
+      "batch update error:",
+      err.response?.data || err.message
+    );
+  }
+};
+
+

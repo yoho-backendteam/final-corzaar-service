@@ -2,7 +2,7 @@ import CartCourses from "../../models/cart/index.js";
 import Enrollment from "../../models/studentmanagment/Enrollment.js";
 import student_management from "../../models/studentmanagment/student_management.js";
 import { logActivity } from "../../utils/ActivitylogHelper.js";
-import { GetBatchData, GetBranchData, GetCourseDataForCart, GetPaymentById, GetUserData } from "../../utils/cart/index.js";
+import { GetBatchData, GetBranchData, GetCourseDataForCart, GetPaymentById, GetUserData, UpdateBatchData } from "../../utils/cart/index.js";
 import { createOrderValidation } from "../../validations/studentmanagement/enrollment.js";
 import mongoose from "mongoose";
 
@@ -244,8 +244,19 @@ export const updateEnrollment = async (req, res) => {
       message: "Enrollment not found.",
 
     })
+
+    const { userId } = enrollment;
+    const { courseId, batchId} = enrollment?.items;
+    console.log(enrollment?.items?.courseId,"cour")
+    console.log(batchId,"bat")
+    console.log(userId,"user")
+
+    const update = await UpdateBatchData(courseId,batchId,userId)
+
+    console.log(update,"update")
+
     logActivity({
-      userid: user._id.toString(),
+      userid: user._id,
       actorRole: user?.role
         ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
         : "",

@@ -106,18 +106,26 @@ export const getDashboardData = async (req, res) => {
         items: enroll.items || []
       }));
 
-    const topCourses = [...activeCourses]
-      .sort((a, b) => (b.enrolledCount || 0) - (a.enrolledCount || 0))
-      .slice(0, 5)
-      .map((course) => ({
-        title: course.title,
-        batches: course.batch.length,
-        category: course.category?.primary || "N/A",
-        enrolledCount:Math.round(course.batch.reduce((sum,i) => i.seatsFilled+sum,0)),
-        rating: course.rating || "N/A",
-        instructor: course.instructorName || "Unknown",
-        isActive: course.is_active,
-      }));
+  const topCourses = [...activeCourses]
+  .sort((a, b) => (b.enrolledCount || 0) - (a.enrolledCount || 0))
+  .slice(0, 5)
+  .map((course) => {
+    const enrolledCount = course.batch.reduce(
+      (sum, i) => sum + i.students.length,
+      0
+    );
+
+    return {
+      title: course.title,
+      batches: course.batch.length,
+      category: course.category?.primary || "N/A",
+      enrolledCount,
+      rating: course.rating || "N/A",
+      revenue: enrolledCount * (course.pricing?.price || 0),
+      instructor: course.instructorName || "Unknown",
+      isActive: course.is_active,
+    };
+  });
 
     const totalUsers = students.length;
     const totalCourses = courses.length;
