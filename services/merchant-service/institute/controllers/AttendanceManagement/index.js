@@ -305,15 +305,19 @@ export const GetAllStudentFullAttendance = async (req, res) => {
         if (!allAttendance.length) {
             return res.status(200).json({ message: "No attendance records found" });
         }
-        const allStudentsData = await safeFetch(process.env.API_STUDENT, "Student API");
+        const allStudentsData = await safeFetch(`${process.env.student_url}/api/student_management/getall`, "Student API");
+
 
         const studentIdsInAttendance = new Set();
         allAttendance.forEach(att => {
-            att.dateId.forEach(d => {
+            att.dateId.forEach(d => {    
                 d.attendance.forEach(a => studentIdsInAttendance.add(a.studentId.toString()));
+        
             });
         });
+
         const relevantStudents = allStudentsData?.filter(s => studentIdsInAttendance.has(s._id));
+
         const allDates = [];
         allAttendance.forEach(att => {
             att.dateId.forEach(d => {
@@ -342,7 +346,7 @@ export const GetAllStudentFullAttendance = async (req, res) => {
 
             return {
                 studentId: stu._id,
-                studentName: stu.studentName || stu.name || "Unknown",
+                studentName: stu.fullName || stu.name || " " ,
                 email: stu.email || "",
                 totalPresent,
                 totalAbsent,
