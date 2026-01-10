@@ -7,7 +7,7 @@ const studentRouter = express.Router();
 
 
 studentRouter.post('/create',PermissionVerify(["student","noob"]),createStudent);
-studentRouter.get("/getall",PermissionVerify(["merchant","admin","open"]),getAllStudents)
+studentRouter.get("/getall",getAllStudents)
 studentRouter.get("/getenrolledstudents",PermissionVerify(["merchant"]),getEnrolledStudents)
 studentRouter.get("/getbyid/:id",getStudentById)
 studentRouter.put("/updatebyid/:id",PermissionVerify(["student","noob"]),updateStudentById)
