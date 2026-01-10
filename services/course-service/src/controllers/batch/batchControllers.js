@@ -143,10 +143,12 @@ export const getBatchByStudent = async (req, res) => {
 // get batch by course with batch id
 export const getBatchByBatchId = async (req, res) => {
     const { courseid, batchid } = req.params
+    console.log(courseid,"c if")
+    console.log(batchid,"b if")
 
     try {
-        const checkId = await Batch.findOne({ courseId: courseid, _id: batchid }).populate([{ path: "courseId", model: "Course" }])
-        // console.log("check", checkId)
+        const checkId = await Batch.findOne({ courseId: courseid, _id: batchid }).populate("courseId")
+        console.log("check", checkId)
         res.status(201).json({
             status: true,
             message: "Batch fetched successfully",
